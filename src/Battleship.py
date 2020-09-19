@@ -15,7 +15,13 @@ class Battleship:
         """
 
         #display welcome message
-        print("\n=====================================\nWelcome to Battleship made by Team 14\n=====================================\n")
+        print("")
+        print("===========================")
+        print("   Welcome to Battleship   ")
+        print("   - Made by Team 14       ")
+        print("   - Upgraded by Team 13   ")
+        print("===========================")
+        print("")
         #initialize pygame
         pg.init()
         #set up the mixer to play sounds in two channels, so sink sound and hit sound can happen at the same time
