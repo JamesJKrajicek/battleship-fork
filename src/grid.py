@@ -38,9 +38,7 @@ class Grid:
         win_spaces = win_ships * (win_ships+1) // 2
 
         if p1_count == win_spaces:
-            print("\n==============\nPlayer 1 wins!\n==============\n")
-            return True
+            return 1
         
         if p2_count == win_spaces:
-            print("\n==============\nPlayer 2 wins!\n==============\n")
-            return True
+            return 2

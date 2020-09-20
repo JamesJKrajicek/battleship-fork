@@ -28,7 +28,7 @@ class Battleship:
         #set the name of the window
         pg.display.set_caption("Battleship by team 14, upgraded by team 13")
         #initialize the screen
-        self.screen = pg.display.set_mode((c.WIN_X,c.WIN_Y))
+        self.screen = pg.display.set_mode((c.WIN_X, c.WIN_Y + c.MSG_FONT_SIZE))
         #initialize the clock to control framerate
         self.clock = pg.time.Clock()
         
@@ -42,12 +42,11 @@ class Battleship:
         self.sunk_sound = pg.mixer.Sound("media/sunk.wav")
         self.hit_sound = pg.mixer.Sound("media/hit.wav")
         self.font = pg.font.Font('freesansbold.ttf', 44)
+        self.msg_font = pg.font.Font('freesansbold.ttf', c.MSG_FONT_SIZE)
         
-        #Direction vector for rotating when placing ships 
-        self.shipDir = 0
-        #variable to keep track of the length of next placed ship
-        self.lenShip = 1
-        #initialize the grid
+        self.shipDir = 0 # Direction of the ship currently being placed (index of c.DIRS)
+        self.lenShip = 1 # Length of the ship to place next
+        self.msg = "Awaiting number of ships..." # Message to display below game board
         self.grid = Grid()
         
         self.draw(False, False, False, False)
@@ -72,6 +71,12 @@ class Battleship:
 
         #draw the background
         self.screen.blit(self.bg, (0,0))
+        pg.draw.rect(self.screen, c.BLACK, (0, c.WIN_Y, c.WIN_X, c.MSG_FONT_SIZE))
+        
+        # Render message centered below board
+        text = self.msg_font.render(self.msg, 1, c.WHITE)
+        self.screen.blit(text, text.get_rect(centerx=c.WIN_X//2, top=c.WIN_Y))
+        
         #loop through all squares on the grid
         for i in range(len(self.grid.grid)):
             for j in range(len(self.grid.grid[0])):
@@ -114,7 +119,7 @@ class Battleship:
                 int(P2Shooting or P2Placing)*10*c.SQUARE_SIZE, # Right half if player 2
                 int(P1Placing or P2Placing)*10*c.SQUARE_SIZE, # Bottom half if placing
                 10*c.SQUARE_SIZE, 10*c.SQUARE_SIZE))
-
+        
         pg.display.update()
 
     def checkValidShip(self, P2Placing, effectiveX, effectiveY):
@@ -178,7 +183,7 @@ class Battleship:
         placedShips = 0
         p1Ships = []
         p2Ships = []
-        print("\n===========================================\nPlayer 1 is now placing, look away player 2\nYou can press 'R' to rotate!\n===========================================\n")
+        self.msg = "First P1, place your 1 ship. Press 'R' to rotate."
         #game loop
         while 1:
             #loop through all events
@@ -205,15 +210,16 @@ class Battleship:
                             p1Ships.append(newShip)
                             self.lenShip += 1
                             placedShips += 1
+                            self.msg = "P1 place your " + str(self.lenShip) + " ship. Press \"R\" to rotate."
                             #if player one finishes placing, reset things for player two's turn
                             if placedShips == self.numShipsPerPlayer:
-                                print("\n===========================================\nPlayer 2 is now placing, look away player 1\nYou can press 'R' to rotate!\n===========================================\n")
+                                self.msg = "Now P2, place your 1 ship. Press \"R\" to rotate."
                                 self.shipDir = 0
                                 P1Placing = False
                                 P2Placing = True
                                 self.lenShip = 1
                         else:
-                            print("P1: Invalid Ship!")
+                            self.msg = "P1: Invalid ship location! Press \"R\" to rotate."
                     #if player two is placing, place the ship if it is valid
                     elif P2Placing:
                         if self.checkValidShip(True, effectiveX, effectiveY):
@@ -222,52 +228,60 @@ class Battleship:
                             p2Ships.append(newShip)
                             self.lenShip += 1
                             placedShips += 1
+                            self.msg = "P2 place your " + str(self.lenShip) + " ship. Press \"R\" to rotate."
+                            #if all ships have been placed, player two is done placing
+                            if placedShips >= self.numShipsPerPlayer * 2:
+                                P2Placing = False
+                                P1Shooting = True
+                                self.msg = "All ships placed. P1 shoot first."
                         else:
-                            print("P2: Invalid Ship!")
-                        #if all ships have been placed, player two is done placing
-                        if placedShips >= self.numShipsPerPlayer * 2:
-                            P2Placing = False
-                            P1Shooting = True
-                            print("\n=========================================================\nBoth players have placed their ships. Take turns shooting\n=========================================================\n")
+                            self.msg = "P2: Invalid ship location! Press \"R\" to rotate."
                     elif P1Shooting:
                         #if the bounds are valid, shoot the square, then if a ship has said square, mark it as hit. 
                         #then, if the ship is sunk for the first time, print a message and play a sound
                         if effectiveY > 0 and effectiveY < 10 and effectiveX > 0 and effectiveX < 10 and self.grid.grid[effectiveY][effectiveX] == "Open":
                             self.grid.shoot(effectiveY, effectiveX)
+                            self.msg = "P1 miss."
                             P1Shooting = False
                             P2Shooting = True
                             for ship in p2Ships:
                                 for square in ship.shipSquares:
                                     if square.x == effectiveX and square.y == effectiveY:
                                         self.channel1.play(self.hit_sound)
+                                        self.msg = "P1 hit!"
                                         square.hit = True
                                 if not ship.sunk and ship.checkSunk():
                                     self.channel2.play(self.sunk_sound)
-                                    print("\n=====================\nPlayer 1 sunk a ship!\n=====================\n")
+                                    self.msg = "P1 sunk a ship!"
                         else:
-                            print("P1: Invalid space!")
+                            self.msg = "P1: Invalid space!"
                     elif P2Shooting:
                         #if the bounds are valid, shoot the square, then if a ship has said square, mark it as hit. 
                         #then, if the ship is sunk for the first time, print a message and play a sound
                         if effectiveY > 0 and effectiveY < 10 and effectiveX > 10 and effectiveX <= 20 and self.grid.grid[effectiveY][effectiveX] == "Open":
                             self.grid.shoot(effectiveY, effectiveX)
+                            self.msg = "P2 miss."
                             P2Shooting = False
                             P1Shooting = True
                             for ship in p1Ships:
                                 for square in ship.shipSquares:
                                     if square.x == effectiveX and square.y == effectiveY:
                                         self.channel1.play(self.hit_sound)
+                                        self.msg = "P2 hit!"
                                         square.hit = True
                                 if not ship.sunk and ship.checkSunk():
                                     self.channel2.play(self.sunk_sound)
-                                    print("\n=====================\nPlayer 2 sunk a ship!\n=====================\n")
+                                    self.msg = "P2 sunk a ship!"
                         else:
-                            print("P2: Invalid space!")
+                            self.msg = "P2: Invalid space!"
             #If the game ends, break the loop and finish the program
-            if not GameWon and self.grid.check_winner(self.numShipsPerPlayer):
-                P1Shooting = False
-                P2Shooting = False
-                GameWon = True
+            if not GameWon:
+                winner = self.grid.check_winner(self.numShipsPerPlayer)
+                if winner:
+                    self.msg = "P" + str(winner) + " wins!"
+                    P1Shooting = False
+                    P2Shooting = False
+                    GameWon = True
             #update the screen for this frame
             self.draw(P1Placing, P2Placing, P1Shooting, P2Shooting)
             #advance the while loop at increments of 60FPS
