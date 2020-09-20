@@ -236,52 +236,40 @@ class Battleship:
                                 self.msg = "All ships placed. P1 shoot first."
                         else:
                             self.msg = "P2: Invalid ship location! Press \"R\" to rotate."
-                    elif P1Shooting:
-                        #if the bounds are valid, shoot the square, then if a ship has said square, mark it as hit. 
-                        #then, if the ship is sunk for the first time, print a message and play a sound
-                        if effectiveY > 0 and effectiveY < 10 and effectiveX > 0 and effectiveX < 10 and self.grid.grid[effectiveY][effectiveX] == "Open":
+                    elif P1Shooting or P2Shooting:
+                        player_name = "P" + str(int(P2Shooting)+1)
+                        enemy_ships = p2Ships if P1Shooting else p1Ships
+
+                        # If the player fired at an open space on the correct board
+                        if (0 < effectiveY < 10 and 
+                            (0 if P1Shooting else 10) < effectiveX < (10 if P1Shooting else 20) and 
+                            self.grid.grid[effectiveY][effectiveX] == "Open"
+                        ):
                             self.grid.shoot(effectiveY, effectiveX)
-                            self.msg = "P1 miss."
-                            P1Shooting = False
-                            P2Shooting = True
-                            for ship in p2Ships:
+                            self.msg = player_name + " miss."
+                            P1Shooting = not P1Shooting
+                            P2Shooting = not P2Shooting
+                            # Find if the space they attacked has an enemy ship
+                            for ship in enemy_ships:
                                 for square in ship.shipSquares:
+                                    # If player hit a ship
                                     if square.x == effectiveX and square.y == effectiveY:
                                         self.channel1.play(self.hit_sound)
-                                        self.msg = "P1 hit!"
+                                        self.msg = player_name + " hit!"
                                         square.hit = True
-                                if not ship.sunk and ship.checkSunk():
-                                    self.channel2.play(self.sunk_sound)
-                                    self.msg = "P1 sunk a ship!"
+                                        # Check if they sunk a ship
+                                        if not ship.sunk and ship.checkSunk():
+                                            self.channel2.play(self.sunk_sound)
+                                            self.msg = player_name + " sunk a ship!"
+                                            # Check if they won the game
+                                            if self.grid.check_winner(self.numShipsPerPlayer):
+                                                self.msg = player_name + " wins!"
+                                                P1Shooting = False
+                                                P2Shooting = False
+                                                GameWon = True
+                                        break
                         else:
-                            self.msg = "P1: Invalid space!"
-                    elif P2Shooting:
-                        #if the bounds are valid, shoot the square, then if a ship has said square, mark it as hit. 
-                        #then, if the ship is sunk for the first time, print a message and play a sound
-                        if effectiveY > 0 and effectiveY < 10 and effectiveX > 10 and effectiveX <= 20 and self.grid.grid[effectiveY][effectiveX] == "Open":
-                            self.grid.shoot(effectiveY, effectiveX)
-                            self.msg = "P2 miss."
-                            P2Shooting = False
-                            P1Shooting = True
-                            for ship in p1Ships:
-                                for square in ship.shipSquares:
-                                    if square.x == effectiveX and square.y == effectiveY:
-                                        self.channel1.play(self.hit_sound)
-                                        self.msg = "P2 hit!"
-                                        square.hit = True
-                                if not ship.sunk and ship.checkSunk():
-                                    self.channel2.play(self.sunk_sound)
-                                    self.msg = "P2 sunk a ship!"
-                        else:
-                            self.msg = "P2: Invalid space!"
-            #If the game ends, break the loop and finish the program
-            if not GameWon:
-                winner = self.grid.check_winner(self.numShipsPerPlayer)
-                if winner:
-                    self.msg = "P" + str(winner) + " wins!"
-                    P1Shooting = False
-                    P2Shooting = False
-                    GameWon = True
+                            self.msg = player_name + " invalid space! Try again."
             #update the screen for this frame
             self.draw(P1Placing, P2Placing, P1Shooting, P2Shooting)
             #advance the while loop at increments of 60FPS
