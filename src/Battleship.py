@@ -184,6 +184,7 @@ class Battleship:
         P2Placing = False
         P1Shooting = False
         P2Shooting = False
+        GameWon = False
         placedShips = 0
         p1Ships = []
         p2Ships = []
@@ -273,8 +274,10 @@ class Battleship:
                         else:
                             print("P2: Invalid space!")
             #If the game ends, break the loop and finish the program
-            if self.gridW.__winner__(self.numShipsPerPlayer) == True:
-                break
+            if not GameWon and self.gridW.__winner__(self.numShipsPerPlayer):
+                P1Shooting = False
+                P2Shooting = False
+                GameWon = True
             #update the screen for this frame
             self.draw(P1Placing, P2Placing, P1Shooting, P2Shooting)
             #advance the while loop at increments of 60FPS
