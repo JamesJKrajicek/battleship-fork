@@ -1,13 +1,16 @@
 import pygame as pg
-import tkinter as tk
-import tkinter.simpledialog
-import os
 import sys
 import math
+from src.BattleshipView import BattleshipView
 from src.grid import Grid
 from src.ship import Ship, ShipNode
 import src.constants as c
+
 class Battleship:
+    """
+        This class handles the game logic
+    """
+    
     def __init__(self):
 
         """
@@ -17,105 +20,17 @@ class Battleship:
         @author Daniel and Saher
         """
         
-        # Center window
-        os.environ['SDL_VIDEO_CENTERED'] = '1'
-        # Initialize pygame
-        pg.init()
-        # Set up the mixer to play sounds in two channels, so sink sound and hit sound can happen at the same time
-        pg.mixer.init(frequency = 44100, size = -16, channels = 1, buffer = 2**12)
-        self.channel1 = pg.mixer.Channel(0)
-        self.channel2 = pg.mixer.Channel(1)
-        # Set the name of the window
-        pg.display.set_caption("Battleship by team 14, upgraded by team 13")
-        # Initialize the screen to the desired size
-        self.screen = pg.display.set_mode((c.WIN_X, c.WIN_Y + c.MSG_FONT_SIZE))
-        # Initialize the clock to control framerate
-        self.clock = pg.time.Clock()
+        self.view = BattleshipView()
         
-        # Initialize PyGame assets
-        self.boardHighlight = pg.Surface((int(c.WIN_X / 2), int(c.WIN_Y / 2)))
-        self.boardHighlight.set_alpha(99)
-        self.boardHighlight.fill(c.RED)
-        self.bg = pg.transform.scale(pg.image.load("media/background-day.jpg"), (c.WIN_X, c.WIN_Y))
-        self.hit = pg.transform.scale(pg.image.load("media/redX.png"), (c.SQUARE_SIZE, c.SQUARE_SIZE))
-        self.miss = pg.transform.scale(pg.image.load("media/blackX.png"), (c.SQUARE_SIZE, c.SQUARE_SIZE))
-        self.sunk_sound = pg.mixer.Sound("media/sunk.wav")
-        self.hit_sound = pg.mixer.Sound("media/hit.wav")
-        self.font = pg.font.Font('freesansbold.ttf', 44)
-        self.msg_font = pg.font.Font('freesansbold.ttf', c.MSG_FONT_SIZE)
-        
+        # These members are "public", to be used in BattleshipView
+        self.grid = Grid()
         self.shipDir = 0 # Direction of the ship currently being placed (index of c.DIRS)
         self.lenShip = 1 # Length of the ship to place next
         self.msg = "Awaiting number of ships..." # Message to display below game board
-        self.grid = Grid()
         
-        self.draw(False, False, False)
+        self.view.draw(self, False, False, False)
         
-        # Get the number of ships per player, and protect from bad input
-        root = tk.Tk()
-        root.eval('tk::PlaceWindow . center') # Approximately center the dialog
-        root.withdraw()
-        self.numShipsPerPlayer = tkinter.simpledialog.askinteger("Battleship", "How many ships per player? (1-5)", minvalue=1, maxvalue=5)
-        if self.numShipsPerPlayer is None: # User pressed cancel
-            pg.quit()
-            sys.exit()
-
-    def draw(self, is_P1_turn, is_placing, is_shooting):
-
-        """
-        @pre game is running
-        @post The screen is updated for the next frame
-        @param is_P1_turn if it is currently player 1's turn, else player 2.
-        @param is_placing If ships are currently being placed
-        @param is_shooting If ships are currently being shot
-        @author Daniel, Saher, Drake
-        """
-
-        # Draw the background
-        self.screen.blit(self.bg, (0,0))
-        pg.draw.rect(self.screen, c.BLACK, (0, c.WIN_Y, c.WIN_X, c.MSG_FONT_SIZE))
-        
-        # Render message centered below board
-        text = self.msg_font.render(self.msg, 1, c.WHITE)
-        self.screen.blit(text, text.get_rect(centerx=c.WIN_X//2, top=c.WIN_Y))
-        
-        # Loop through all squares on the grid
-        for i in range(len(self.grid.grid)):
-            for j in range(len(self.grid.grid[0])):
-                # Draw thin vertical line on grid
-                pg.draw.line(self.screen, c.BLACK, (j * c.SQUARE_SIZE, 0), (j * c.SQUARE_SIZE, c.WIN_Y), 1)
-                # If the square is a ship, draw the ship only when that player is placing
-                if self.grid.grid[i][j] == "Ship" and is_placing and i > 10 and ((is_P1_turn and j < 10) or (not is_P1_turn and j > 10)):
-                    pg.draw.rect(self.screen, c.RED, (j * c.SQUARE_SIZE, i * c.SQUARE_SIZE, c.SQUARE_SIZE, c.SQUARE_SIZE))
-                elif self.grid.grid[i][j] == "hit": # Draw hit marker
-                    self.screen.blit(self.hit, (j * c.SQUARE_SIZE, i * c.SQUARE_SIZE, c.SQUARE_SIZE, c.SQUARE_SIZE))
-                elif self.grid.grid[i][j] == "miss": # Draw miss marker
-                    self.screen.blit(self.miss, (j * c.SQUARE_SIZE, i * c.SQUARE_SIZE, c.SQUARE_SIZE, c.SQUARE_SIZE))
-                if i % 10 == 0:
-                    # Draw a thick horizontal seperator between boards
-                    pg.draw.line(self.screen, c.BLACK, (i * c.SQUARE_SIZE, 0), (i * c.SQUARE_SIZE, c.WIN_Y), 5)
-                    if j % 10 == 0: 
-                        # Draw a thick vertical seperator AND skip axis label in board corners by "continue"
-                        pg.draw.line(self.screen, c.BLACK, (0, j * c.SQUARE_SIZE), (c.WIN_X, j * c.SQUARE_SIZE), 5)
-                        continue
-                    # Draw axis labels
-                    self.screen.blit(self.font.render(c.Alpha[(j - 1) % 10], True, c.BLACK), (int(j * c.SQUARE_SIZE), int(i * c.SQUARE_SIZE)))
-                    self.screen.blit(self.font.render(str(j % 10), True, c.BLACK), (int(i * c.SQUARE_SIZE + c.SQUARE_SIZE / 4), int(j * c.SQUARE_SIZE)))
-            # Draw thin horizontal line on the grid between boards
-            pg.draw.line(self.screen, c.BLACK, (0, i * c.SQUARE_SIZE), (c.WIN_X, i * c.SQUARE_SIZE), 1)
-        if is_placing:
-            #display a mock ship and the direction it's being placed
-            mousePos = pg.mouse.get_pos()
-            pg.draw.line(self.screen, c.RED, (mousePos[0], mousePos[1]), (mousePos[0] + c.SQUARE_SIZE * self.lenShip * c.DIRS[self.shipDir][0], mousePos[1] + (c.SQUARE_SIZE * self.lenShip * c.DIRS[self.shipDir][1])), 10)
-        
-        # Highlight the active board
-        if is_placing or is_shooting:
-            self.screen.blit(self.boardHighlight, (
-                int(not is_P1_turn)*10*c.SQUARE_SIZE, # Right half if player 2
-                int(is_placing)*10*c.SQUARE_SIZE, # Bottom half if placing
-                10*c.SQUARE_SIZE, 10*c.SQUARE_SIZE))
-        
-        pg.display.update()
+        self.numShipsPerPlayer = self.view.get_num_ships()
 
     def checkValidShip(self, is_P1_turn, effectiveX, effectiveY):
 
@@ -171,6 +86,9 @@ class Battleship:
         @post The game starts. The function finishes when the game finishes.
         @author Saher and Daniel
         """
+        
+        # Initialize the clock to control framerate
+        clock = pg.time.Clock()
 
         is_P1_turn = True
         is_placing = True
@@ -186,12 +104,12 @@ class Battleship:
                 if event.type == pg.QUIT:
                     pg.quit()
                     sys.exit()
-                if event.type == pg.KEYDOWN:
+                elif event.type == pg.KEYDOWN:
                     # If the user types "r" and someone is placing, rotate to the next direction
                     if event.key == pg.K_r and is_placing:
                         self.shipDir = (self.shipDir + 1) % len(c.DIRS)
                 # When the user clicks, do one of three things
-                if event.type == pg.MOUSEBUTTONDOWN:
+                elif event.type == pg.MOUSEBUTTONDOWN:
                     # Get the mouse position and convert it to an X/Y coordinate on the grid
                     mousePos = pg.mouse.get_pos()
                     effectiveX = math.floor(mousePos[0]/(c.SQUARE_SIZE))
@@ -238,12 +156,12 @@ class Battleship:
                                 for square in ship.shipSquares:
                                     # If player hit a ship
                                     if square.x == effectiveX and square.y == effectiveY:
-                                        self.channel1.play(self.hit_sound)
+                                        self.view.play_hit_sound()
                                         self.msg = player_name + " hit!"
                                         square.hit = True
                                         # Check if they sunk the ship
                                         if not ship.sunk and ship.checkSunk():
-                                            self.channel2.play(self.sunk_sound)
+                                            self.view.play_sunk_sound()
                                             self.msg = player_name + " sunk a ship!"
                                             # Check if they won the game
                                             if self.grid.check_winner(self.numShipsPerPlayer):
@@ -253,6 +171,6 @@ class Battleship:
                         else:
                             self.msg = player_name + " invalid space! Try again."
             # Update the screen for this frame
-            self.draw(is_P1_turn, is_placing, is_shooting)
+            self.view.draw(self, is_P1_turn, is_placing, is_shooting)
             # Advance the while loop at increments of 60FPS
-            self.clock.tick(60)
+            clock.tick(60)
