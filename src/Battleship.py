@@ -46,7 +46,7 @@ class Battleship:
             else:
                 break
         #initialize the screen
-        self.screen=pg.display.set_mode((c.WIN_X,c.WIN_Y))
+        self.screen = pg.display.set_mode((c.WIN_X,c.WIN_Y))
         #
         self.boardHighlight = pg.Surface((int(c.WIN_X / 2), int(c.WIN_Y / 2)))
         self.boardHighlight.set_alpha(99)
@@ -64,37 +64,11 @@ class Battleship:
         #initialize font object for the axis labels
         self.font = pg.font.Font('freesansbold.ttf', 44)
         #Direction vector for rotating when placing ships 
-        self.shipDirectionVector = [0,1]
+        self.shipDir = 0
         #variable to keep track of the length of next placed ship
         self.lenShip = 1
         #initialize the grid
         self.gridW = gridWrapper()
-
-    def rotateDirVec(self):
-
-        """
-        @pre none
-        @post rotates the direction vector for placing ships clockwise
-        @author Daniel
-        """
-
-        #rotate the direction vector clockwise
-        if self.shipDirectionVector[0] == 0 and self.shipDirectionVector[1] == 1:
-            self.shipDirectionVector[0] = -1
-            self.shipDirectionVector[1] = 0
-            #print("left")
-        elif self.shipDirectionVector[0] == -1 and self.shipDirectionVector[1] == 0:
-            self.shipDirectionVector[0] = 0
-            self.shipDirectionVector[1] = -1
-            #print("up")
-        elif self.shipDirectionVector[0] == 0 and self.shipDirectionVector[1] == -1:
-            self.shipDirectionVector[0] = 1
-            self.shipDirectionVector[1] = 0
-            #print("right")
-        elif self.shipDirectionVector[0] == 1 and self.shipDirectionVector[1] == 0:
-            self.shipDirectionVector[0] = 0
-            self.shipDirectionVector[1] = 1
-            #print("down")
 
     def draw(self, P1Placing, P2Placing, P1Shooting, P2Shooting):
 
@@ -141,7 +115,7 @@ class Battleship:
         if P1Placing or P2Placing:
             #display a mock ship and the direction it's being placed
             mousePos = pg.mouse.get_pos()
-            pg.draw.line(self.screen, c.RED, (mousePos[0], mousePos[1]), (mousePos[0] + c.SQUARE_SIZE * self.lenShip * self.shipDirectionVector[0], mousePos[1] + (c.SQUARE_SIZE * self.lenShip * self.shipDirectionVector[1])), 10)
+            pg.draw.line(self.screen, c.RED, (mousePos[0], mousePos[1]), (mousePos[0] + c.SQUARE_SIZE * self.lenShip * c.DIRECTIONS[self.shipDir][0], mousePos[1] + (c.SQUARE_SIZE * self.lenShip * c.DIRECTIONS[self.shipDir][1])), 10)
         if P1Placing:
             self.screen.blit(self.boardHighlight, (0, 10*c.SQUARE_SIZE, 10*c.SQUARE_SIZE, 10*c.SQUARE_SIZE))
         elif P2Placing:
@@ -167,30 +141,30 @@ class Battleship:
             #loop through all "ship squares"
             for i in range(self.lenShip):
                 #if the Y coordinate is not in P1's quadrant, the ship is not valid
-                if (effectiveY + self.shipDirectionVector[1] * i >= 20) or (effectiveY + self.shipDirectionVector[1] * i <= 10):
+                if (effectiveY + c.DIRECTIONS[self.shipDir][1] * i >= 20) or (effectiveY + c.DIRECTIONS[self.shipDir][1] * i <= 10):
                     valid = False
                     break
                 #if the X coordinate is not in P1's quadrant, the ship is not valid
-                if  (effectiveX + self.shipDirectionVector[0] * i >= 10) or (effectiveX + self.shipDirectionVector[0] * i <= 0):
+                if  (effectiveX + c.DIRECTIONS[self.shipDir][0] * i >= 10) or (effectiveX + c.DIRECTIONS[self.shipDir][0] * i <= 0):
                     valid = False
                     break
                 #if the square is already occupied by a ship, the ship is not valid
-                if (self.gridW.grid[effectiveY + self.shipDirectionVector[1] * i][effectiveX + self.shipDirectionVector[0] * i] != "Open"):
+                if (self.gridW.grid[effectiveY + c.DIRECTIONS[self.shipDir][1] * i][effectiveX + c.DIRECTIONS[self.shipDir][0] * i] != "Open"):
                     valid = False
                     break
         elif P2Placing:
             #loop through all "ship squares"
             for i in range(self.lenShip):
                 #if the Y coordinate is not in P2's quadrant, the ship is not valid
-                if (effectiveY + self.shipDirectionVector[1] * i >= 20) or (effectiveY + self.shipDirectionVector[1] * i <= 10):
+                if (effectiveY + c.DIRECTIONS[self.shipDir][1] * i >= 20) or (effectiveY + c.DIRECTIONS[self.shipDir][1] * i <= 10):
                     valid = False
                     break
                 #if the X coordinate is not in P2's quadrant, the ship is not valid
-                if  (effectiveX + self.shipDirectionVector[0] * i <= 10) or (effectiveX + self.shipDirectionVector[0] * i >= 20):
+                if  (effectiveX + c.DIRECTIONS[self.shipDir][0] * i <= 10) or (effectiveX + c.DIRECTIONS[self.shipDir][0] * i >= 20):
                     valid = False
                     break
                 #if the square is already occupied by a ship, the ship is not valid
-                if  (self.gridW.grid[effectiveY + self.shipDirectionVector[1] * i][effectiveX + self.shipDirectionVector[0] * i] != "Open"):
+                if  (self.gridW.grid[effectiveY + c.DIRECTIONS[self.shipDir][1] * i][effectiveX + c.DIRECTIONS[self.shipDir][0] * i] != "Open"):
                     valid = False
                     break
         #if neither player is placing, there are no valid ship placements, THIS SHOULD NEVER HAPPEN
@@ -210,8 +184,8 @@ class Battleship:
 
         #loop through all "ship squares" and place them on the grid
         for i in range(self.lenShip):
-            squareX = effectiveX + self.shipDirectionVector[0] * i
-            squareY = effectiveY + self.shipDirectionVector[1] * i
+            squareX = effectiveX + c.DIRECTIONS[self.shipDir][0] * i
+            squareY = effectiveY + c.DIRECTIONS[self.shipDir][1] * i
             self.gridW.grid[squareY][squareX] = "Ship"
             if P1Placing:
                 ship.addSquare(squareX + 10, squareY - 10)
@@ -245,9 +219,9 @@ class Battleship:
                     pg.quit()
                     sys.exit()
                 if event.type == pg.KEYDOWN:
-                    #if the user types "r" and someone is placing, rotate the direction vector
+                    #if the user types "r" and someone is placing, rotate to the next direction
                     if event.key == pg.K_r and (P1Placing or P2Placing):
-                        self.rotateDirVec()
+                        self.shipDir = (self.shipDir + 1) % len(c.DIRECTIONS)
                 #when the user clicks, do one of three things
                 if event.type == pg.MOUSEBUTTONDOWN:
                     #get the mouse position and convert it to an X/Y coordinate on the grid
@@ -265,8 +239,7 @@ class Battleship:
                             #if player one finishes placing, reset things for player two's turn
                             if placedShips == self.numShipsPerPlayer:
                                 print("\n===========================================\nPlayer 2 is now placing, look away player 1\nYou can press 'R' to rotate!\n===========================================\n")
-                                self.shipDirectionVector[0] = 0
-                                self.shipDirectionVector[1] = 1
+                                self.shipDir = 0
                                 P1Placing = False
                                 P2Placing = True
                                 self.lenShip = 1
