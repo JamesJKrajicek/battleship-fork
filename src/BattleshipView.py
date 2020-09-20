@@ -2,6 +2,7 @@ import pygame as pg
 import tkinter as tk
 import tkinter.simpledialog
 import os
+import sys
 import src.constants as c
 
 class BattleshipView:
@@ -52,13 +53,11 @@ class BattleshipView:
     def play_sunk_sound(self):
         self.channel2.play(self.sunk_sound)
         
-    def draw(self, controller, is_P1_turn, is_placing, is_shooting):
+    def draw(self, gs):
         """
         @pre game is running
         @post The screen is updated for the next frame
-        @param is_P1_turn if it is currently player 1's turn, else player 2.
-        @param is_placing If ships are currently being placed
-        @param is_shooting If ships are currently being shot
+        @param gs The GameState object representing the current state of the game
         @author Daniel, Saher, Drake
         """
 
@@ -67,20 +66,20 @@ class BattleshipView:
         pg.draw.rect(self.screen, c.BLACK, (0, c.WIN_Y, c.WIN_X, c.MSG_FONT_SIZE))
         
         # Render message centered below board
-        text = self.msg_font.render(controller.msg, 1, c.WHITE)
+        text = self.msg_font.render(gs.msg, 1, c.WHITE)
         self.screen.blit(text, text.get_rect(centerx=c.WIN_X//2, top=c.WIN_Y))
         
         # Loop through all squares on the grid
-        for i in range(len(controller.grid.grid)):
-            for j in range(len(controller.grid.grid[0])):
+        for i in range(len(gs.grid.grid)):
+            for j in range(len(gs.grid.grid[0])):
                 # Draw thin vertical line on grid
                 pg.draw.line(self.screen, c.BLACK, (j * c.SQUARE_SIZE, 0), (j * c.SQUARE_SIZE, c.WIN_Y), 1)
                 # If the square is a ship, draw the ship only when that player is placing
-                if controller.grid.grid[i][j] == "Ship" and is_placing and i > 10 and ((is_P1_turn and j < 10) or (not is_P1_turn and j > 10)):
+                if gs.grid.grid[i][j] == "Ship" and gs.is_placing and i > 10 and ((gs.is_P1_turn and j < 10) or (not gs.is_P1_turn and j > 10)):
                     pg.draw.rect(self.screen, c.RED, (j * c.SQUARE_SIZE, i * c.SQUARE_SIZE, c.SQUARE_SIZE, c.SQUARE_SIZE))
-                elif controller.grid.grid[i][j] == "hit": # Draw hit marker
+                elif gs.grid.grid[i][j] == "hit": # Draw hit marker
                     self.screen.blit(self.hit, (j * c.SQUARE_SIZE, i * c.SQUARE_SIZE, c.SQUARE_SIZE, c.SQUARE_SIZE))
-                elif controller.grid.grid[i][j] == "miss": # Draw miss marker
+                elif gs.grid.grid[i][j] == "miss": # Draw miss marker
                     self.screen.blit(self.miss, (j * c.SQUARE_SIZE, i * c.SQUARE_SIZE, c.SQUARE_SIZE, c.SQUARE_SIZE))
                 if i % 10 == 0:
                     # Draw a thick horizontal seperator between boards
@@ -94,16 +93,16 @@ class BattleshipView:
                     self.screen.blit(self.font.render(str(j % 10), True, c.BLACK), (int(i * c.SQUARE_SIZE + c.SQUARE_SIZE / 4), int(j * c.SQUARE_SIZE)))
             # Draw thin horizontal line on the grid between boards
             pg.draw.line(self.screen, c.BLACK, (0, i * c.SQUARE_SIZE), (c.WIN_X, i * c.SQUARE_SIZE), 1)
-        if is_placing:
+        if gs.is_placing:
             #display a mock ship and the direction it's being placed
             mousePos = pg.mouse.get_pos()
-            pg.draw.line(self.screen, c.RED, (mousePos[0], mousePos[1]), (mousePos[0] + c.SQUARE_SIZE * controller.lenShip * c.DIRS[controller.shipDir][0], mousePos[1] + (c.SQUARE_SIZE * controller.lenShip * c.DIRS[controller.shipDir][1])), 10)
+            pg.draw.line(self.screen, c.RED, (mousePos[0], mousePos[1]), (mousePos[0] + c.SQUARE_SIZE * gs.lenShip * c.DIRS[gs.shipDir][0], mousePos[1] + (c.SQUARE_SIZE * gs.lenShip * c.DIRS[gs.shipDir][1])), 10)
         
         # Highlight the active board
-        if is_placing or is_shooting:
+        if gs.is_placing or gs.is_shooting:
             self.screen.blit(self.boardHighlight, (
-                int(not is_P1_turn)*10*c.SQUARE_SIZE, # Right half if player 2
-                int(is_placing)*10*c.SQUARE_SIZE, # Bottom half if placing
+                int(not gs.is_P1_turn)*10*c.SQUARE_SIZE, # Right half if player 2
+                int(gs.is_placing)*10*c.SQUARE_SIZE, # Bottom half if placing
                 10*c.SQUARE_SIZE, 10*c.SQUARE_SIZE))
         
         pg.display.update()
