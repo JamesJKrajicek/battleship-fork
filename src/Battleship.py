@@ -49,7 +49,7 @@ class Battleship:
         self.msg = "Awaiting number of ships..." # Message to display below game board
         self.grid = Grid()
         
-        self.draw(False, False, False, False)
+        self.draw(False, False, False)
         
         # Get the number of ships per player, and protect from bad input
         root = tk.Tk()
@@ -60,13 +60,15 @@ class Battleship:
             pg.quit()
             sys.exit()
 
-    def draw(self, P1Placing, P2Placing, P1Shooting, P2Shooting):
+    def draw(self, is_P1_turn, is_placing, is_shooting):
 
         """
         @pre game is running
         @post The screen is updated for the next frame
-        @param P1/P2Placing indicate if either player is placing. P1/P2Shooting indicates if either player is placing.
-        @author Daniel and Saher
+        @param is_P1_turn if it is currently player 1's turn, else player 2.
+        @param is_placing If ships are currently being placed
+        @param is_shooting If ships are currently being shot
+        @author Daniel, Saher, Drake
         """
 
         #draw the background
@@ -84,9 +86,9 @@ class Battleship:
                 pg.draw.line(self.screen, c.BLACK, (j * c.SQUARE_SIZE, 0), (j * c.SQUARE_SIZE, c.WIN_Y), 1)
                 #if the square is a ship, draw the ship only when that player is placing
                 if self.grid.grid[i][j] == "Ship":
-                    if P1Placing and i > 10 and j < 10:
+                    if is_placing and is_P1_turn and i > 10 and j < 10:
                         pg.draw.rect(self.screen, c.RED, (j * c.SQUARE_SIZE, i * c.SQUARE_SIZE, c.SQUARE_SIZE, c.SQUARE_SIZE))
-                    elif P2Placing and i > 10 and j > 10:
+                    elif is_placing and not is_P1_turn and i > 10 and j > 10:
                         pg.draw.rect(self.screen, c.RED, (j * c.SQUARE_SIZE, i * c.SQUARE_SIZE, c.SQUARE_SIZE, c.SQUARE_SIZE))
                 #if the square is a hit, draw the hit
                 elif self.grid.grid[i][j] == "hit":
@@ -108,26 +110,26 @@ class Battleship:
                     self.screen.blit((self.font.render(str(j % 10), True, c.BLACK)), (int(i * c.SQUARE_SIZE + c.SQUARE_SIZE / 4), int(j * c.SQUARE_SIZE)))
             #draw horizontal line on the grid
             pg.draw.line(self.screen, c.BLACK, (0, i * c.SQUARE_SIZE), (c.WIN_X, i * c.SQUARE_SIZE), 1)
-        if P1Placing or P2Placing:
+        if is_placing:
             #display a mock ship and the direction it's being placed
             mousePos = pg.mouse.get_pos()
             pg.draw.line(self.screen, c.RED, (mousePos[0], mousePos[1]), (mousePos[0] + c.SQUARE_SIZE * self.lenShip * c.DIRS[self.shipDir][0], mousePos[1] + (c.SQUARE_SIZE * self.lenShip * c.DIRS[self.shipDir][1])), 10)
         
         # Highlight the active board
-        if P1Placing or P2Placing or P1Shooting or P2Shooting:
+        if is_placing or is_shooting:
             self.screen.blit(self.boardHighlight, (
-                int(P2Shooting or P2Placing)*10*c.SQUARE_SIZE, # Right half if player 2
-                int(P1Placing or P2Placing)*10*c.SQUARE_SIZE, # Bottom half if placing
+                int(not is_P1_turn)*10*c.SQUARE_SIZE, # Right half if player 2
+                int(is_placing)*10*c.SQUARE_SIZE, # Bottom half if placing
                 10*c.SQUARE_SIZE, 10*c.SQUARE_SIZE))
         
         pg.display.update()
 
-    def checkValidShip(self, P2Placing, effectiveX, effectiveY):
+    def checkValidShip(self, is_P1_turn, effectiveX, effectiveY):
 
         """
         @pre game is running, one player is placing
         @post returns true if that ship placement results in no overslow/index errors/another ship is in the way, else false
-        @param PP2Placing indicates if Player2 is the one placing (otherwise Player1)
+        @param is_P1_turn indicates if player 1 is the one placing (otherwise player 2)
         @param effectiveX/Y is the converted mouse input mapped to the grid
         @author Daniel, Saher, Drake
         """
@@ -137,21 +139,21 @@ class Battleship:
             #if the Y coordinate is not in the bottom board area, the ship is not valid
             if ((effectiveY + c.DIRS[self.shipDir][1] * i >= 20) or # Bottom edge
                 (effectiveY + c.DIRS[self.shipDir][1] * i <= 10) or # Top edge
-                (effectiveX + c.DIRS[self.shipDir][0] * i <= int(P2Placing)*10) or # Left edge
-                (effectiveX + c.DIRS[self.shipDir][0] * i >= 10+int(P2Placing)*10) or # Right edge
+                (effectiveX + c.DIRS[self.shipDir][0] * i <= int(not is_P1_turn)*10) or # Left edge
+                (effectiveX + c.DIRS[self.shipDir][0] * i >= 10+int(not is_P1_turn)*10) or # Right edge
                 (self.grid.grid[effectiveY + c.DIRS[self.shipDir][1] * i][effectiveX + c.DIRS[self.shipDir][0] * i] != "Open")): # Space occupied
                 return False
 
 		# All ship squares are valid, so placement is valid
         return True
 
-    def placeShip(self, P2Placing, effectiveX, effectiveY, ship):
+    def placeShip(self, is_P1_turn, effectiveX, effectiveY, ship):
 
         """
         @pre game is running and one of the players is placing
         @post ship is placed on grid
         @param effectiveX/Y are the converted mouse inputs
-        @param P2Placing indicates if Player2 is the one placing (otherwise Player1)
+        @param is_P1_turn indicates if player 1 is the one placing (otherwise player 2)
         @param Ship is the ship to be placed
         @author Daniel
         """
@@ -161,11 +163,11 @@ class Battleship:
             squareX = effectiveX + c.DIRS[self.shipDir][0] * i
             squareY = effectiveY + c.DIRS[self.shipDir][1] * i
             self.grid.grid[squareY][squareX] = "Ship"
-            # The -10 and +10 is because the placing and attacking boards are on opposite sides
-            if P2Placing:
-                ship.addSquare(squareX - 10, squareY - 10)
-            else: #Player 1
+            # The -10 and +10 for squareX is because the placing and attacking boards are on opposite sides
+            if is_P1_turn:
                 ship.addSquare(squareX + 10, squareY - 10)
+            else: #Player 2
+                ship.addSquare(squareX - 10, squareY - 10)
 
     def run(self):
 
@@ -175,12 +177,9 @@ class Battleship:
         @author Saher and Daniel
         """
 
-        P1Placing = True
-        P2Placing = False
-        P1Shooting = False
-        P2Shooting = False
-        GameWon = False
-        placedShips = 0
+        is_P1_turn = True
+        is_placing = True
+        is_shooting = False
         p1Ships = []
         p2Ships = []
         self.msg = "First P1, place your 1 ship. Press 'R' to rotate."
@@ -194,7 +193,7 @@ class Battleship:
                     sys.exit()
                 if event.type == pg.KEYDOWN:
                     #if the user types "r" and someone is placing, rotate to the next direction
-                    if event.key == pg.K_r and (P1Placing or P2Placing):
+                    if event.key == pg.K_r and is_placing:
                         self.shipDir = (self.shipDir + 1) % len(c.DIRS)
                 #when the user clicks, do one of three things
                 if event.type == pg.MOUSEBUTTONDOWN:
@@ -202,46 +201,43 @@ class Battleship:
                     mousePos = pg.mouse.get_pos()
                     effectiveX = math.floor(mousePos[0]/(c.SQUARE_SIZE))
                     effectiveY = math.floor(mousePos[1]/(c.SQUARE_SIZE))
-                    # If a player is placing, place the ship if it is valid
-                    if P1Placing or P2Placing:
-                        player_name = "P" + str(int(P2Placing)+1)
-                        player_ships = p1Ships if P1Placing else p2Ships
+                    player_name = "P" + str(2-int(is_P1_turn)) # P1 or P2
+
+                    if is_placing:
+                        player_ships = p1Ships if is_P1_turn else p2Ships
                         
-                        if self.checkValidShip(P2Placing, effectiveX, effectiveY):
+                        if self.checkValidShip(is_P1_turn, effectiveX, effectiveY):
                             newShip = Ship()
-                            self.placeShip(P2Placing, effectiveX, effectiveY, newShip)
+                            self.placeShip(is_P1_turn, effectiveX, effectiveY, newShip)
                             player_ships.append(newShip)
                             self.lenShip += 1
-                            placedShips += 1
                             self.msg = "P1 place your " + str(self.lenShip) + " ship. Press \"R\" to rotate."
                             #if player one finishes placing, reset things for player two's turn
                             if self.lenShip > self.numShipsPerPlayer:
-                                if P1Placing:
+                                if is_P1_turn:
                                     self.msg = "Now P2, place your 1 ship. Press \"R\" to rotate."
                                     self.shipDir = 0
-                                    P1Placing = False
-                                    P2Placing = True
+                                    is_P1_turn = False
                                     self.lenShip = 1
-                                else: #P2Placing
-                                    P2Placing = False
-                                    P1Shooting = True
+                                else: #P2 turn
+                                    is_P1_turn = True
+                                    is_placing = False
+                                    is_shooting = True
                                     self.msg = "All ships placed. P1 shoot first."
                         else:
                             self.msg = player_name + " invalid ship location! Press \"R\" to rotate."
 
-                    elif P1Shooting or P2Shooting:
-                        player_name = "P" + str(int(P2Shooting)+1)
-                        enemy_ships = p2Ships if P1Shooting else p1Ships
+                    elif is_shooting:
+                        enemy_ships = p2Ships if is_P1_turn else p1Ships
 
                         # If the player fired at an open space on the correct board
                         if (0 < effectiveY < 10 and 
-                            (0 if P1Shooting else 10) < effectiveX < (10 if P1Shooting else 20) and 
+                            (0 if is_P1_turn else 10) < effectiveX < (10 if is_P1_turn else 20) and 
                             self.grid.grid[effectiveY][effectiveX] == "Open"
                         ):
                             self.grid.shoot(effectiveY, effectiveX)
                             self.msg = player_name + " miss."
-                            P1Shooting = not P1Shooting
-                            P2Shooting = not P2Shooting
+                            is_P1_turn = not is_P1_turn
                             # Find if the space they attacked has an enemy ship
                             for ship in enemy_ships:
                                 for square in ship.shipSquares:
@@ -257,13 +253,11 @@ class Battleship:
                                             # Check if they won the game
                                             if self.grid.check_winner(self.numShipsPerPlayer):
                                                 self.msg = player_name + " wins!"
-                                                P1Shooting = False
-                                                P2Shooting = False
-                                                GameWon = True
+                                                is_shooting = False
                                         break
                         else:
                             self.msg = player_name + " invalid space! Try again."
             #update the screen for this frame
-            self.draw(P1Placing, P2Placing, P1Shooting, P2Shooting)
+            self.draw(is_P1_turn, is_placing, is_shooting)
             #advance the while loop at increments of 60FPS
             self.clock.tick(60)
