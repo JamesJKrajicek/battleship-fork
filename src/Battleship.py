@@ -1,6 +1,7 @@
 import pygame as pg
 import tkinter as tk
 import tkinter.simpledialog
+import os
 import sys
 import math
 from src.grid import Grid
@@ -15,15 +16,9 @@ class Battleship:
         @param none
         @author Daniel and Saher
         """
-
-        #display welcome message
-        print("")
-        print("===========================")
-        print("   Welcome to Battleship   ")
-        print("   - Made by Team 14       ")
-        print("   - Upgraded by Team 13   ")
-        print("===========================")
-        print("")
+        
+        #center window
+        os.environ['SDL_VIDEO_CENTERED'] = '1'
         #initialize pygame
         pg.init()
         #set up the mixer to play sounds in two channels, so sink sound and hit sound can happen at the same time
@@ -31,7 +26,7 @@ class Battleship:
         self.channel1 = pg.mixer.Channel(0)
         self.channel2 = pg.mixer.Channel(1)
         #set the name of the window
-        pg.display.set_caption("Battleship")
+        pg.display.set_caption("Battleship by team 14, upgraded by team 13")
         #initialize the screen
         self.screen = pg.display.set_mode((c.WIN_X,c.WIN_Y))
         #initialize the clock to control framerate
@@ -55,9 +50,11 @@ class Battleship:
         #initialize the grid
         self.grid = Grid()
         
-        #get the number of ships per player, and protect from bad input
         self.draw(False, False, False, False)
+        
+        # Get the number of ships per player, and protect from bad input
         root = tk.Tk()
+        root.eval('tk::PlaceWindow . center') # Approximately center the dialog
         root.withdraw()
         self.numShipsPerPlayer = tkinter.simpledialog.askinteger("Battleship", "How many ships per player? (1-5)", minvalue=1, maxvalue=5)
         if self.numShipsPerPlayer is None: # User pressed cancel
