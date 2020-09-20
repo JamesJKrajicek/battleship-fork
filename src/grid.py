@@ -1,20 +1,20 @@
 import src.constants as c
-class gridWrapper:
+class Grid:
     def __init__(self):
         self.grid = []
         for row in range(c.NUM_ROWS):
             self.grid.append([])
             for column in range (c.NUM_ROWS):
                 self.grid[row].append("Open")
-    def __shoot__(self,y,x):
-        if x >= 1 and x <= 9:
+    def shoot(self, y, x):
+        if x >= 1 and x <= 9: # Player 1
             if self.grid[y-10][x+10] == "Ship":
                 self.grid[y][x] = "hit"
                 #print("hit ship")            
             else:
                 self.grid[y][x] = "miss"
                 #print("You Missed")
-        elif x >= 10 and y <= 20:
+        elif x >= 10 and y <= 20: # Player 2
             if self.grid[y-10][x-10] == "Ship":
                 self.grid[y][x] = "hit"
                 #print("hit ship")
@@ -22,7 +22,7 @@ class gridWrapper:
                 self.grid[y][x] = "miss"
                 #print("You Missed")
 
-    def __winner__ (self,win_ships):
+    def check_winner(self, win_ships):
         p1_count = 0
         p2_count = 0
         for x in range(1,10):

@@ -1,7 +1,7 @@
 import pygame as pg
 import sys
 import math
-from src.grid import gridWrapper
+from src.grid import Grid
 from src.ship import Ship, ShipNode
 import src.constants as c
 class Battleship:
@@ -45,30 +45,29 @@ class Battleship:
                 quit()
             else:
                 break
+                
         #initialize the screen
         self.screen = pg.display.set_mode((c.WIN_X,c.WIN_Y))
-        #
+        #initialize the clock to control framerate
+        self.clock = pg.time.Clock()
+        
+        #initialize PyGame assets
         self.boardHighlight = pg.Surface((int(c.WIN_X / 2), int(c.WIN_Y / 2)))
         self.boardHighlight.set_alpha(99)
         self.boardHighlight.fill(c.RED)
-        #initialize the clock to control framerate
-        self.clock = pg.time.Clock()
-        #load the images and scale them accordingly
         self.bg = pg.transform.scale(pg.image.load("media/background-day.jpg"), (c.WIN_X, c.WIN_Y))
         self.hit = pg.transform.scale(pg.image.load("media/redX.png"), (c.SQUARE_SIZE, c.SQUARE_SIZE))
         self.miss = pg.transform.scale(pg.image.load("media/blackX.png"), (c.SQUARE_SIZE, c.SQUARE_SIZE))
-        #sound for a ship sinking
         self.sunk_sound = pg.mixer.Sound("media/sunk.wav")
-        #sound for a ship being hit
         self.hit_sound = pg.mixer.Sound("media/hit.wav")
-        #initialize font object for the axis labels
         self.font = pg.font.Font('freesansbold.ttf', 44)
+        
         #Direction vector for rotating when placing ships 
         self.shipDir = 0
         #variable to keep track of the length of next placed ship
         self.lenShip = 1
         #initialize the grid
-        self.gridW = gridWrapper()
+        self.grid = Grid()
 
     def draw(self, P1Placing, P2Placing, P1Shooting, P2Shooting):
 
@@ -82,21 +81,21 @@ class Battleship:
         #draw the background
         self.screen.blit(self.bg, (0,0))
         #loop through all squares on the grid
-        for i in range(len(self.gridW.grid)):
-            for j in range(len(self.gridW.grid[0])):
+        for i in range(len(self.grid.grid)):
+            for j in range(len(self.grid.grid[0])):
                 #draw vertical line on grid
                 pg.draw.line(self.screen, c.BLACK, (j * c.SQUARE_SIZE, 0), (j * c.SQUARE_SIZE, c.WIN_Y), 1)
                 #if the square is a ship, draw the ship only when that player is placing
-                if self.gridW.grid[i][j] == "Ship":
+                if self.grid.grid[i][j] == "Ship":
                     if P1Placing and i > 10 and j < 10:
                         pg.draw.rect(self.screen, c.RED, (j * c.SQUARE_SIZE, i * c.SQUARE_SIZE, c.SQUARE_SIZE, c.SQUARE_SIZE))
                     elif P2Placing and i > 10 and j > 10:
                         pg.draw.rect(self.screen, c.RED, (j * c.SQUARE_SIZE, i * c.SQUARE_SIZE, c.SQUARE_SIZE, c.SQUARE_SIZE))
                 #if the square is a hit, draw the hit
-                elif self.gridW.grid[i][j] == "hit":
+                elif self.grid.grid[i][j] == "hit":
                     self.screen.blit(self.hit, (j * c.SQUARE_SIZE, i * c.SQUARE_SIZE, c.SQUARE_SIZE, c.SQUARE_SIZE))
                 #if the square is a miss, draw the miss
-                elif self.gridW.grid[i][j] == "miss":
+                elif self.grid.grid[i][j] == "miss":
                     self.screen.blit(self.miss, (j * c.SQUARE_SIZE, i * c.SQUARE_SIZE, c.SQUARE_SIZE, c.SQUARE_SIZE))
                 #if the row is divisible by ten
                 if i % 10 == 0:
@@ -116,15 +115,13 @@ class Battleship:
             #display a mock ship and the direction it's being placed
             mousePos = pg.mouse.get_pos()
             pg.draw.line(self.screen, c.RED, (mousePos[0], mousePos[1]), (mousePos[0] + c.SQUARE_SIZE * self.lenShip * c.DIRS[self.shipDir][0], mousePos[1] + (c.SQUARE_SIZE * self.lenShip * c.DIRS[self.shipDir][1])), 10)
-        if P1Placing:
-            self.screen.blit(self.boardHighlight, (0, 10*c.SQUARE_SIZE, 10*c.SQUARE_SIZE, 10*c.SQUARE_SIZE))
-        elif P2Placing:
-            self.screen.blit(self.boardHighlight, (10*c.SQUARE_SIZE, 10*c.SQUARE_SIZE, 10*c.SQUARE_SIZE, 10*c.SQUARE_SIZE))
-        elif P1Shooting:
-            self.screen.blit(self.boardHighlight, (0, 0, 10*c.SQUARE_SIZE, 10*c.SQUARE_SIZE))
-        elif P2Shooting:
-            self.screen.blit(self.boardHighlight, (10*c.SQUARE_SIZE, 0, 10*c.SQUARE_SIZE, 10*c.SQUARE_SIZE))
-        #update the display
+        
+        # Highlight the active board
+        self.screen.blit(self.boardHighlight, (
+            int(P2Shooting or P2Placing)*10*c.SQUARE_SIZE, # Right half if player 2
+            int(P1Placing or P2Placing)*10*c.SQUARE_SIZE, # Bottom half if placing
+            10*c.SQUARE_SIZE, 10*c.SQUARE_SIZE))
+
         pg.display.update()
 
     def checkValidShip(self, P2Placing, effectiveX, effectiveY):
@@ -144,7 +141,7 @@ class Battleship:
                 (effectiveY + c.DIRS[self.shipDir][1] * i <= 10) or # Top edge
                 (effectiveX + c.DIRS[self.shipDir][0] * i <= int(P2Placing)*10) or # Left edge
                 (effectiveX + c.DIRS[self.shipDir][0] * i >= 10+int(P2Placing)*10) or # Right edge
-                (self.gridW.grid[effectiveY + c.DIRS[self.shipDir][1] * i][effectiveX + c.DIRS[self.shipDir][0] * i] != "Open")): # Space occupied
+                (self.grid.grid[effectiveY + c.DIRS[self.shipDir][1] * i][effectiveX + c.DIRS[self.shipDir][0] * i] != "Open")): # Space occupied
                 return False
 
 		# All ship squares are valid, so placement is valid
@@ -165,7 +162,7 @@ class Battleship:
         for i in range(self.lenShip):
             squareX = effectiveX + c.DIRS[self.shipDir][0] * i
             squareY = effectiveY + c.DIRS[self.shipDir][1] * i
-            self.gridW.grid[squareY][squareX] = "Ship"
+            self.grid.grid[squareY][squareX] = "Ship"
             # The -10 and +10 is because the placing and attacking boards are on opposite sides
             if P2Placing:
                 ship.addSquare(squareX - 10, squareY - 10)
@@ -210,9 +207,9 @@ class Battleship:
                     #if player one is placing, place the ship if it is valid
                     if P1Placing:
                         if self.checkValidShip(False, effectiveX, effectiveY):
-                            tempShip = Ship()
-                            self.placeShip(False, effectiveX, effectiveY, tempShip)
-                            p1Ships.append(tempShip)
+                            newShip = Ship()
+                            self.placeShip(False, effectiveX, effectiveY, newShip)
+                            p1Ships.append(newShip)
                             self.lenShip += 1
                             placedShips += 1
                             #if player one finishes placing, reset things for player two's turn
@@ -227,9 +224,9 @@ class Battleship:
                     #if player two is placing, place the ship if it is valid
                     elif P2Placing:
                         if self.checkValidShip(True, effectiveX, effectiveY):
-                            tempShip = Ship()
-                            self.placeShip(True, effectiveX, effectiveY, tempShip)
-                            p2Ships.append(tempShip)
+                            newShip = Ship()
+                            self.placeShip(True, effectiveX, effectiveY, newShip)
+                            p2Ships.append(newShip)
                             self.lenShip += 1
                             placedShips += 1
                         else:
@@ -242,8 +239,8 @@ class Battleship:
                     elif P1Shooting:
                         #if the bounds are valid, shoot the square, then if a ship has said square, mark it as hit. 
                         #then, if the ship is sunk for the first time, print a message and play a sound
-                        if effectiveY > 0 and effectiveY < 10 and effectiveX > 0 and effectiveX < 10 and self.gridW.grid[effectiveY][effectiveX] == "Open":
-                            self.gridW.__shoot__(effectiveY, effectiveX)
+                        if effectiveY > 0 and effectiveY < 10 and effectiveX > 0 and effectiveX < 10 and self.grid.grid[effectiveY][effectiveX] == "Open":
+                            self.grid.shoot(effectiveY, effectiveX)
                             P1Shooting = False
                             P2Shooting = True
                             for ship in p2Ships:
@@ -251,7 +248,7 @@ class Battleship:
                                     if square.x == effectiveX and square.y == effectiveY:
                                         self.channel1.play(self.hit_sound)
                                         square.hit = True
-                                if ship.sunk == False and ship.checkSunk():
+                                if not ship.sunk and ship.checkSunk():
                                     self.channel2.play(self.sunk_sound)
                                     print("\n=====================\nPlayer 1 sunk a ship!\n=====================\n")
                         else:
@@ -259,8 +256,8 @@ class Battleship:
                     elif P2Shooting:
                         #if the bounds are valid, shoot the square, then if a ship has said square, mark it as hit. 
                         #then, if the ship is sunk for the first time, print a message and play a sound
-                        if effectiveY > 0 and effectiveY < 10 and effectiveX > 10 and effectiveX <= 20 and self.gridW.grid[effectiveY][effectiveX] == "Open":
-                            self.gridW.__shoot__(effectiveY, effectiveX)
+                        if effectiveY > 0 and effectiveY < 10 and effectiveX > 10 and effectiveX <= 20 and self.grid.grid[effectiveY][effectiveX] == "Open":
+                            self.grid.shoot(effectiveY, effectiveX)
                             P2Shooting = False
                             P1Shooting = True
                             for ship in p1Ships:
@@ -268,13 +265,13 @@ class Battleship:
                                     if square.x == effectiveX and square.y == effectiveY:
                                         self.channel1.play(self.hit_sound)
                                         square.hit = True
-                                if ship.sunk == False and ship.checkSunk():
+                                if not ship.sunk and ship.checkSunk():
                                     self.channel2.play(self.sunk_sound)
                                     print("\n=====================\nPlayer 2 sunk a ship!\n=====================\n")
                         else:
                             print("P2: Invalid space!")
             #If the game ends, break the loop and finish the program
-            if not GameWon and self.gridW.__winner__(self.numShipsPerPlayer):
+            if not GameWon and self.grid.check_winner(self.numShipsPerPlayer):
                 P1Shooting = False
                 P2Shooting = False
                 GameWon = True
