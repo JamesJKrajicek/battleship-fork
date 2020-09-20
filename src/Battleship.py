@@ -1,4 +1,6 @@
 import pygame as pg
+import tkinter as tk
+import tkinter.simpledialog
 import sys
 import math
 from src.grid import Grid
@@ -30,22 +32,6 @@ class Battleship:
         self.channel2 = pg.mixer.Channel(1)
         #set the name of the window
         pg.display.set_caption("Battleship")
-        #get the number of ships per player, and protect from bad input
-        while 1: 
-            try: 
-                self.numShipsPerPlayer = int(input("How many ships per player? (1-5): "))
-                if self.numShipsPerPlayer > 5 or self.numShipsPerPlayer < 1:
-                    raise Exception("OutOfRange") 
-            except ValueError: 
-                print("Your input was not an integer. Please input an integer between 1 and 5.")
-            except Exception:
-                print("Please input an integer between 1 and 5.")
-            except:
-                print("Something went wrong. Exiting...")
-                quit()
-            else:
-                break
-                
         #initialize the screen
         self.screen = pg.display.set_mode((c.WIN_X,c.WIN_Y))
         #initialize the clock to control framerate
@@ -68,6 +54,15 @@ class Battleship:
         self.lenShip = 1
         #initialize the grid
         self.grid = Grid()
+        
+        #get the number of ships per player, and protect from bad input
+        self.draw(False, False, False, False)
+        root = tk.Tk()
+        root.withdraw()
+        self.numShipsPerPlayer = tkinter.simpledialog.askinteger("Battleship", "How many ships per player? (1-5)", minvalue=1, maxvalue=5)
+        if self.numShipsPerPlayer is None: # User pressed cancel
+            pg.quit()
+            sys.exit()
 
     def draw(self, P1Placing, P2Placing, P1Shooting, P2Shooting):
 
@@ -117,10 +112,11 @@ class Battleship:
             pg.draw.line(self.screen, c.RED, (mousePos[0], mousePos[1]), (mousePos[0] + c.SQUARE_SIZE * self.lenShip * c.DIRS[self.shipDir][0], mousePos[1] + (c.SQUARE_SIZE * self.lenShip * c.DIRS[self.shipDir][1])), 10)
         
         # Highlight the active board
-        self.screen.blit(self.boardHighlight, (
-            int(P2Shooting or P2Placing)*10*c.SQUARE_SIZE, # Right half if player 2
-            int(P1Placing or P2Placing)*10*c.SQUARE_SIZE, # Bottom half if placing
-            10*c.SQUARE_SIZE, 10*c.SQUARE_SIZE))
+        if P1Placing or P2Placing or P1Shooting or P2Shooting:
+            self.screen.blit(self.boardHighlight, (
+                int(P2Shooting or P2Placing)*10*c.SQUARE_SIZE, # Right half if player 2
+                int(P1Placing or P2Placing)*10*c.SQUARE_SIZE, # Bottom half if placing
+                10*c.SQUARE_SIZE, 10*c.SQUARE_SIZE))
 
         pg.display.update()
 
