@@ -202,40 +202,33 @@ class Battleship:
                     mousePos = pg.mouse.get_pos()
                     effectiveX = math.floor(mousePos[0]/(c.SQUARE_SIZE))
                     effectiveY = math.floor(mousePos[1]/(c.SQUARE_SIZE))
-                    #if player one is placing, place the ship if it is valid
-                    if P1Placing:
-                        if self.checkValidShip(False, effectiveX, effectiveY):
+                    # If a player is placing, place the ship if it is valid
+                    if P1Placing or P2Placing:
+                        player_name = "P" + str(int(P2Placing)+1)
+                        player_ships = p1Ships if P1Placing else p2Ships
+                        
+                        if self.checkValidShip(P2Placing, effectiveX, effectiveY):
                             newShip = Ship()
-                            self.placeShip(False, effectiveX, effectiveY, newShip)
-                            p1Ships.append(newShip)
+                            self.placeShip(P2Placing, effectiveX, effectiveY, newShip)
+                            player_ships.append(newShip)
                             self.lenShip += 1
                             placedShips += 1
                             self.msg = "P1 place your " + str(self.lenShip) + " ship. Press \"R\" to rotate."
                             #if player one finishes placing, reset things for player two's turn
-                            if placedShips == self.numShipsPerPlayer:
-                                self.msg = "Now P2, place your 1 ship. Press \"R\" to rotate."
-                                self.shipDir = 0
-                                P1Placing = False
-                                P2Placing = True
-                                self.lenShip = 1
+                            if self.lenShip > self.numShipsPerPlayer:
+                                if P1Placing:
+                                    self.msg = "Now P2, place your 1 ship. Press \"R\" to rotate."
+                                    self.shipDir = 0
+                                    P1Placing = False
+                                    P2Placing = True
+                                    self.lenShip = 1
+                                else: #P2Placing
+                                    P2Placing = False
+                                    P1Shooting = True
+                                    self.msg = "All ships placed. P1 shoot first."
                         else:
-                            self.msg = "P1: Invalid ship location! Press \"R\" to rotate."
-                    #if player two is placing, place the ship if it is valid
-                    elif P2Placing:
-                        if self.checkValidShip(True, effectiveX, effectiveY):
-                            newShip = Ship()
-                            self.placeShip(True, effectiveX, effectiveY, newShip)
-                            p2Ships.append(newShip)
-                            self.lenShip += 1
-                            placedShips += 1
-                            self.msg = "P2 place your " + str(self.lenShip) + " ship. Press \"R\" to rotate."
-                            #if all ships have been placed, player two is done placing
-                            if placedShips >= self.numShipsPerPlayer * 2:
-                                P2Placing = False
-                                P1Shooting = True
-                                self.msg = "All ships placed. P1 shoot first."
-                        else:
-                            self.msg = "P2: Invalid ship location! Press \"R\" to rotate."
+                            self.msg = player_name + " invalid ship location! Press \"R\" to rotate."
+
                     elif P1Shooting or P2Shooting:
                         player_name = "P" + str(int(P2Shooting)+1)
                         enemy_ships = p2Ships if P1Shooting else p1Ships
@@ -257,7 +250,7 @@ class Battleship:
                                         self.channel1.play(self.hit_sound)
                                         self.msg = player_name + " hit!"
                                         square.hit = True
-                                        # Check if they sunk a ship
+                                        # Check if they sunk the ship
                                         if not ship.sunk and ship.checkSunk():
                                             self.channel2.play(self.sunk_sound)
                                             self.msg = player_name + " sunk a ship!"
