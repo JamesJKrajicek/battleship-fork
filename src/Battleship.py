@@ -17,22 +17,22 @@ class Battleship:
         @author Daniel and Saher
         """
         
-        #center window
+        # Center window
         os.environ['SDL_VIDEO_CENTERED'] = '1'
-        #initialize pygame
+        # Initialize pygame
         pg.init()
-        #set up the mixer to play sounds in two channels, so sink sound and hit sound can happen at the same time
+        # Set up the mixer to play sounds in two channels, so sink sound and hit sound can happen at the same time
         pg.mixer.init(frequency = 44100, size = -16, channels = 1, buffer = 2**12)
         self.channel1 = pg.mixer.Channel(0)
         self.channel2 = pg.mixer.Channel(1)
-        #set the name of the window
+        # Set the name of the window
         pg.display.set_caption("Battleship by team 14, upgraded by team 13")
-        #initialize the screen
+        # Initialize the screen to the desired size
         self.screen = pg.display.set_mode((c.WIN_X, c.WIN_Y + c.MSG_FONT_SIZE))
-        #initialize the clock to control framerate
+        # Initialize the clock to control framerate
         self.clock = pg.time.Clock()
         
-        #initialize PyGame assets
+        # Initialize PyGame assets
         self.boardHighlight = pg.Surface((int(c.WIN_X / 2), int(c.WIN_Y / 2)))
         self.boardHighlight.set_alpha(99)
         self.boardHighlight.fill(c.RED)
@@ -71,7 +71,7 @@ class Battleship:
         @author Daniel, Saher, Drake
         """
 
-        #draw the background
+        # Draw the background
         self.screen.blit(self.bg, (0,0))
         pg.draw.rect(self.screen, c.BLACK, (0, c.WIN_Y, c.WIN_X, c.MSG_FONT_SIZE))
         
@@ -79,36 +79,29 @@ class Battleship:
         text = self.msg_font.render(self.msg, 1, c.WHITE)
         self.screen.blit(text, text.get_rect(centerx=c.WIN_X//2, top=c.WIN_Y))
         
-        #loop through all squares on the grid
+        # Loop through all squares on the grid
         for i in range(len(self.grid.grid)):
             for j in range(len(self.grid.grid[0])):
-                #draw vertical line on grid
+                # Draw thin vertical line on grid
                 pg.draw.line(self.screen, c.BLACK, (j * c.SQUARE_SIZE, 0), (j * c.SQUARE_SIZE, c.WIN_Y), 1)
-                #if the square is a ship, draw the ship only when that player is placing
-                if self.grid.grid[i][j] == "Ship":
-                    if is_placing and is_P1_turn and i > 10 and j < 10:
-                        pg.draw.rect(self.screen, c.RED, (j * c.SQUARE_SIZE, i * c.SQUARE_SIZE, c.SQUARE_SIZE, c.SQUARE_SIZE))
-                    elif is_placing and not is_P1_turn and i > 10 and j > 10:
-                        pg.draw.rect(self.screen, c.RED, (j * c.SQUARE_SIZE, i * c.SQUARE_SIZE, c.SQUARE_SIZE, c.SQUARE_SIZE))
-                #if the square is a hit, draw the hit
-                elif self.grid.grid[i][j] == "hit":
+                # If the square is a ship, draw the ship only when that player is placing
+                if self.grid.grid[i][j] == "Ship" and is_placing and i > 10 and ((is_P1_turn and j < 10) or (not is_P1_turn and j > 10)):
+                    pg.draw.rect(self.screen, c.RED, (j * c.SQUARE_SIZE, i * c.SQUARE_SIZE, c.SQUARE_SIZE, c.SQUARE_SIZE))
+                elif self.grid.grid[i][j] == "hit": # Draw hit marker
                     self.screen.blit(self.hit, (j * c.SQUARE_SIZE, i * c.SQUARE_SIZE, c.SQUARE_SIZE, c.SQUARE_SIZE))
-                #if the square is a miss, draw the miss
-                elif self.grid.grid[i][j] == "miss":
+                elif self.grid.grid[i][j] == "miss": # Draw miss marker
                     self.screen.blit(self.miss, (j * c.SQUARE_SIZE, i * c.SQUARE_SIZE, c.SQUARE_SIZE, c.SQUARE_SIZE))
-                #if the row is divisible by ten
                 if i % 10 == 0:
-                    #draw a large horizontal seperator
+                    # Draw a thick horizontal seperator between boards
                     pg.draw.line(self.screen, c.BLACK, (i * c.SQUARE_SIZE, 0), (i * c.SQUARE_SIZE, c.WIN_Y), 5)
-                    #if the col is divisible by ten
                     if j % 10 == 0: 
-                        #draw a large vertical seperator AND don't draw the axis labels by "continue"
+                        # Draw a thick vertical seperator AND skip axis label in board corners by "continue"
                         pg.draw.line(self.screen, c.BLACK, (0, j * c.SQUARE_SIZE), (c.WIN_X, j * c.SQUARE_SIZE), 5)
                         continue
-                    #draw axis labels
-                    self.screen.blit((self.font.render(c.Alpha[(j - 1) % 10], True, c.BLACK)), (int(j * c.SQUARE_SIZE), int(i * c.SQUARE_SIZE)))
-                    self.screen.blit((self.font.render(str(j % 10), True, c.BLACK)), (int(i * c.SQUARE_SIZE + c.SQUARE_SIZE / 4), int(j * c.SQUARE_SIZE)))
-            #draw horizontal line on the grid
+                    # Draw axis labels
+                    self.screen.blit(self.font.render(c.Alpha[(j - 1) % 10], True, c.BLACK), (int(j * c.SQUARE_SIZE), int(i * c.SQUARE_SIZE)))
+                    self.screen.blit(self.font.render(str(j % 10), True, c.BLACK), (int(i * c.SQUARE_SIZE + c.SQUARE_SIZE / 4), int(j * c.SQUARE_SIZE)))
+            # Draw thin horizontal line on the grid between boards
             pg.draw.line(self.screen, c.BLACK, (0, i * c.SQUARE_SIZE), (c.WIN_X, i * c.SQUARE_SIZE), 1)
         if is_placing:
             #display a mock ship and the direction it's being placed
@@ -134,14 +127,16 @@ class Battleship:
         @author Daniel, Saher, Drake
         """
         
-        # loop through all "ship squares", checking they are within the correct board and unoccupied
+        # Loop through all "ship squares", checking they are within the correct board and unoccupied
         for i in range(self.lenShip):
-            #if the Y coordinate is not in the bottom board area, the ship is not valid
-            if ((effectiveY + c.DIRS[self.shipDir][1] * i >= 20) or # Bottom edge
-                (effectiveY + c.DIRS[self.shipDir][1] * i <= 10) or # Top edge
-                (effectiveX + c.DIRS[self.shipDir][0] * i <= int(not is_P1_turn)*10) or # Left edge
-                (effectiveX + c.DIRS[self.shipDir][0] * i >= 10+int(not is_P1_turn)*10) or # Right edge
-                (self.grid.grid[effectiveY + c.DIRS[self.shipDir][1] * i][effectiveX + c.DIRS[self.shipDir][0] * i] != "Open")): # Space occupied
+            squareX = effectiveX + c.DIRS[self.shipDir][0] * i
+            squareY = effectiveY + c.DIRS[self.shipDir][1] * i
+            # If the Y coordinate is not in the bottom board area, the ship is not valid
+            if (squareY >= 20 or # Bottom edge
+                squareY <= 10 or # Top edge
+                squareX <= int(not is_P1_turn)*10 or # Left edge
+                squareX >= 10+int(not is_P1_turn)*10 or # Right edge
+                self.grid.grid[squareY][squareX] != "Open"): # Space occupied
                 return False
 
 		# All ship squares are valid, so placement is valid
@@ -158,7 +153,7 @@ class Battleship:
         @author Daniel
         """
 
-        #loop through all "ship squares" and place them on the grid
+        # Loop through all "ship squares" and place them on the grid
         for i in range(self.lenShip):
             squareX = effectiveX + c.DIRS[self.shipDir][0] * i
             squareY = effectiveY + c.DIRS[self.shipDir][1] * i
@@ -183,21 +178,21 @@ class Battleship:
         p1Ships = []
         p2Ships = []
         self.msg = "First P1, place your 1 ship. Press 'R' to rotate."
-        #game loop
+        # Game loop
         while 1:
-            #loop through all events
+            # Loop through all events
             for event in pg.event.get():
-                #if the window is closed, exit program
+                # If the window is closed, exit program
                 if event.type == pg.QUIT:
                     pg.quit()
                     sys.exit()
                 if event.type == pg.KEYDOWN:
-                    #if the user types "r" and someone is placing, rotate to the next direction
+                    # If the user types "r" and someone is placing, rotate to the next direction
                     if event.key == pg.K_r and is_placing:
                         self.shipDir = (self.shipDir + 1) % len(c.DIRS)
-                #when the user clicks, do one of three things
+                # When the user clicks, do one of three things
                 if event.type == pg.MOUSEBUTTONDOWN:
-                    #get the mouse position and convert it to an X/Y coordinate on the grid
+                    # Get the mouse position and convert it to an X/Y coordinate on the grid
                     mousePos = pg.mouse.get_pos()
                     effectiveX = math.floor(mousePos[0]/(c.SQUARE_SIZE))
                     effectiveY = math.floor(mousePos[1]/(c.SQUARE_SIZE))
@@ -212,7 +207,7 @@ class Battleship:
                             player_ships.append(newShip)
                             self.lenShip += 1
                             self.msg = "P1 place your " + str(self.lenShip) + " ship. Press \"R\" to rotate."
-                            #if player one finishes placing, reset things for player two's turn
+                            # If player one finishes placing, reset things for player two's turn
                             if self.lenShip > self.numShipsPerPlayer:
                                 if is_P1_turn:
                                     self.msg = "Now P2, place your 1 ship. Press \"R\" to rotate."
@@ -257,7 +252,7 @@ class Battleship:
                                         break
                         else:
                             self.msg = player_name + " invalid space! Try again."
-            #update the screen for this frame
+            # Update the screen for this frame
             self.draw(is_P1_turn, is_placing, is_shooting)
-            #advance the while loop at increments of 60FPS
+            # Advance the while loop at increments of 60FPS
             self.clock.tick(60)
