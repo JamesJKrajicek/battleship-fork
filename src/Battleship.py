@@ -115,7 +115,7 @@ class Battleship:
         if P1Placing or P2Placing:
             #display a mock ship and the direction it's being placed
             mousePos = pg.mouse.get_pos()
-            pg.draw.line(self.screen, c.RED, (mousePos[0], mousePos[1]), (mousePos[0] + c.SQUARE_SIZE * self.lenShip * c.DIRECTIONS[self.shipDir][0], mousePos[1] + (c.SQUARE_SIZE * self.lenShip * c.DIRECTIONS[self.shipDir][1])), 10)
+            pg.draw.line(self.screen, c.RED, (mousePos[0], mousePos[1]), (mousePos[0] + c.SQUARE_SIZE * self.lenShip * c.DIRS[self.shipDir][0], mousePos[1] + (c.SQUARE_SIZE * self.lenShip * c.DIRS[self.shipDir][1])), 10)
         if P1Placing:
             self.screen.blit(self.boardHighlight, (0, 10*c.SQUARE_SIZE, 10*c.SQUARE_SIZE, 10*c.SQUARE_SIZE))
         elif P2Placing:
@@ -127,51 +127,28 @@ class Battleship:
         #update the display
         pg.display.update()
 
-    def checkValidShip(self, P1Placing, P2Placing, effectiveX, effectiveY):
+    def checkValidShip(self, P2Placing, effectiveX, effectiveY):
 
         """
         @pre game is running, one player is placing
         @post returns true if that ship placement results in no overslow/index errors/another ship is in the way, else false
-        @param P1/P2Placing indicates which player is placing, effectiveX/Y is the converted mouse input mapped to the grid
-        @author Daniel and Saher
+        @param PP2Placing indicates if Player2 is the one placing (otherwise Player1)
+        @param effectiveX/Y is the converted mouse input mapped to the grid
+        @author Daniel, Saher, Drake
         """
+        
+        # loop through all "ship squares", checking they are within the correct board and unoccupied
+        for i in range(self.lenShip):
+            #if the Y coordinate is not in the bottom board area, the ship is not valid
+            if ((effectiveY + c.DIRS[self.shipDir][1] * i >= 20) or # Bottom edge
+                (effectiveY + c.DIRS[self.shipDir][1] * i <= 10) or # Top edge
+                (effectiveX + c.DIRS[self.shipDir][0] * i <= int(P2Placing)*10) or # Left edge
+                (effectiveX + c.DIRS[self.shipDir][0] * i >= 10+int(P2Placing)*10) or # Right edge
+                (self.gridW.grid[effectiveY + c.DIRS[self.shipDir][1] * i][effectiveX + c.DIRS[self.shipDir][0] * i] != "Open")): # Space occupied
+                return False
 
-        valid = True
-        if P1Placing:
-            #loop through all "ship squares"
-            for i in range(self.lenShip):
-                #if the Y coordinate is not in P1's quadrant, the ship is not valid
-                if (effectiveY + c.DIRECTIONS[self.shipDir][1] * i >= 20) or (effectiveY + c.DIRECTIONS[self.shipDir][1] * i <= 10):
-                    valid = False
-                    break
-                #if the X coordinate is not in P1's quadrant, the ship is not valid
-                if  (effectiveX + c.DIRECTIONS[self.shipDir][0] * i >= 10) or (effectiveX + c.DIRECTIONS[self.shipDir][0] * i <= 0):
-                    valid = False
-                    break
-                #if the square is already occupied by a ship, the ship is not valid
-                if (self.gridW.grid[effectiveY + c.DIRECTIONS[self.shipDir][1] * i][effectiveX + c.DIRECTIONS[self.shipDir][0] * i] != "Open"):
-                    valid = False
-                    break
-        elif P2Placing:
-            #loop through all "ship squares"
-            for i in range(self.lenShip):
-                #if the Y coordinate is not in P2's quadrant, the ship is not valid
-                if (effectiveY + c.DIRECTIONS[self.shipDir][1] * i >= 20) or (effectiveY + c.DIRECTIONS[self.shipDir][1] * i <= 10):
-                    valid = False
-                    break
-                #if the X coordinate is not in P2's quadrant, the ship is not valid
-                if  (effectiveX + c.DIRECTIONS[self.shipDir][0] * i <= 10) or (effectiveX + c.DIRECTIONS[self.shipDir][0] * i >= 20):
-                    valid = False
-                    break
-                #if the square is already occupied by a ship, the ship is not valid
-                if  (self.gridW.grid[effectiveY + c.DIRECTIONS[self.shipDir][1] * i][effectiveX + c.DIRECTIONS[self.shipDir][0] * i] != "Open"):
-                    valid = False
-                    break
-        #if neither player is placing, there are no valid ship placements, THIS SHOULD NEVER HAPPEN
-        else:
-            print("Neither player is placing!")
-            valid = False
-        return valid
+		# All ship squares are valid, so placement is valid
+        return True
 
     def placeShip(self, effectiveX, effectiveY, P1Placing, P2Placing, ship):
 
@@ -184,8 +161,8 @@ class Battleship:
 
         #loop through all "ship squares" and place them on the grid
         for i in range(self.lenShip):
-            squareX = effectiveX + c.DIRECTIONS[self.shipDir][0] * i
-            squareY = effectiveY + c.DIRECTIONS[self.shipDir][1] * i
+            squareX = effectiveX + c.DIRS[self.shipDir][0] * i
+            squareY = effectiveY + c.DIRS[self.shipDir][1] * i
             self.gridW.grid[squareY][squareX] = "Ship"
             if P1Placing:
                 ship.addSquare(squareX + 10, squareY - 10)
@@ -221,16 +198,16 @@ class Battleship:
                 if event.type == pg.KEYDOWN:
                     #if the user types "r" and someone is placing, rotate to the next direction
                     if event.key == pg.K_r and (P1Placing or P2Placing):
-                        self.shipDir = (self.shipDir + 1) % len(c.DIRECTIONS)
+                        self.shipDir = (self.shipDir + 1) % len(c.DIRS)
                 #when the user clicks, do one of three things
                 if event.type == pg.MOUSEBUTTONDOWN:
                     #get the mouse position and convert it to an X/Y coordinate on the grid
                     mousePos = pg.mouse.get_pos()
-                    effectiveX = math.floor(mousePos[0]/(c.WIN_Y/20))
-                    effectiveY = math.floor(mousePos[1]/(c.WIN_Y/20))
+                    effectiveX = math.floor(mousePos[0]/(c.SQUARE_SIZE))
+                    effectiveY = math.floor(mousePos[1]/(c.SQUARE_SIZE))
                     #if player one is placing, place the ship if it is valid
                     if P1Placing:
-                        if self.checkValidShip(P1Placing, P2Placing, effectiveX, effectiveY):
+                        if self.checkValidShip(False, effectiveX, effectiveY):
                             tempShip = Ship()
                             self.placeShip(effectiveX, effectiveY, P1Placing, P2Placing, tempShip)
                             p1Ships.append(tempShip)
@@ -247,7 +224,7 @@ class Battleship:
                             print("P1: Invalid Ship!")
                     #if player two is placing, place the ship if it is valid
                     elif P2Placing:
-                        if self.checkValidShip(P1Placing, P2Placing, effectiveX, effectiveY):
+                        if self.checkValidShip(True, effectiveX, effectiveY):
                             tempShip = Ship()
                             self.placeShip(effectiveX, effectiveY, P1Placing, P2Placing, tempShip)
                             p2Ships.append(tempShip)

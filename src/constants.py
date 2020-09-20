@@ -14,4 +14,4 @@ BLUE = [0,0,255]
 Alpha = list(string.ascii_uppercase) #list of alphabet. string lib needed
 
 # Used for ship placement, in clockwise order
-DIRECTIONS = [[0, 1], [-1, 0], [0, -1], [1, 0]]
+DIRS = [[0, 1], [-1, 0], [0, -1], [1, 0]]
