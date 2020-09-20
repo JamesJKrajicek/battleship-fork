@@ -150,12 +150,14 @@ class Battleship:
 		# All ship squares are valid, so placement is valid
         return True
 
-    def placeShip(self, effectiveX, effectiveY, P1Placing, P2Placing, ship):
+    def placeShip(self, P2Placing, effectiveX, effectiveY, ship):
 
         """
         @pre game is running and one of the players is placing
         @post ship is placed on grid
-        @param effectiveX/Y are the converted mouse inputs. P1/P2Placing indicates which player's turn it is. Ship is the ship to be placed
+        @param effectiveX/Y are the converted mouse inputs
+        @param P2Placing indicates if Player2 is the one placing (otherwise Player1)
+        @param Ship is the ship to be placed
         @author Daniel
         """
 
@@ -164,12 +166,11 @@ class Battleship:
             squareX = effectiveX + c.DIRS[self.shipDir][0] * i
             squareY = effectiveY + c.DIRS[self.shipDir][1] * i
             self.gridW.grid[squareY][squareX] = "Ship"
-            if P1Placing:
-                ship.addSquare(squareX + 10, squareY - 10)
-            elif P2Placing:
+            # The -10 and +10 is because the placing and attacking boards are on opposite sides
+            if P2Placing:
                 ship.addSquare(squareX - 10, squareY - 10)
-            else:
-                print("Neither player is placing!")
+            else: #Player 1
+                ship.addSquare(squareX + 10, squareY - 10)
 
     def run(self):
 
@@ -209,7 +210,7 @@ class Battleship:
                     if P1Placing:
                         if self.checkValidShip(False, effectiveX, effectiveY):
                             tempShip = Ship()
-                            self.placeShip(effectiveX, effectiveY, P1Placing, P2Placing, tempShip)
+                            self.placeShip(False, effectiveX, effectiveY, tempShip)
                             p1Ships.append(tempShip)
                             self.lenShip += 1
                             placedShips += 1
@@ -226,7 +227,7 @@ class Battleship:
                     elif P2Placing:
                         if self.checkValidShip(True, effectiveX, effectiveY):
                             tempShip = Ship()
-                            self.placeShip(effectiveX, effectiveY, P1Placing, P2Placing, tempShip)
+                            self.placeShip(True, effectiveX, effectiveY, tempShip)
                             p2Ships.append(tempShip)
                             self.lenShip += 1
                             placedShips += 1
