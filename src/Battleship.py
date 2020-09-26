@@ -39,13 +39,13 @@ class Battleship:
         
         # Loop through all "ship squares", checking they are within the correct board and unoccupied
         for i in range(self.gs.lenShip):
-            squareX = effectiveX + c.DIRS[self.gs.shipDir][0] * i
+            squareX = effectiveX + c.DIRS[self.gs.shipDir][0] * i #c.DIRS is the direction of the ship. 2-D Array Ex. arr[i][j]
             squareY = effectiveY + c.DIRS[self.gs.shipDir][1] * i
             # If the Y coordinate is not in the bottom board area, the ship is not valid
-            if (squareY >= 20 or # Bottom edge
-                squareY <= 10 or # Top edge
-                squareX <= int(not is_P1_turn)*10 or # Left edge
-                squareX >= 10+int(not is_P1_turn)*10 or # Right edge
+            if (squareY >= (c.NUM_ROWS*2) or # Bottom edge
+                squareY <= (c.NUM_ROWS) or # Top edge
+                squareX <= (0 if is_P1_turn else c.NUM_COLS) or # Left edge
+                squareX >= (c.NUM_COLS if is_P1_turn else (c.NUM_COLS*2)) or # Right edge
                 self.gs.grid.grid[squareY][squareX] != "Open"): # Space occupied
                 return False
 
@@ -68,11 +68,11 @@ class Battleship:
             squareX = effectiveX + c.DIRS[self.gs.shipDir][0] * i
             squareY = effectiveY + c.DIRS[self.gs.shipDir][1] * i
             self.gs.grid.grid[squareY][squareX] = "Ship"
-            # The -10 and +10 for squareX is because the placing and attacking boards are on opposite sides
+            # The -10 and +10 for squareX is because the placing and attacking boards are on opposite sides. #Placement
             if is_P1_turn:
-                ship.addSquare(squareX + 10, squareY - 10)
+                ship.addSquare(squareX + c.NUM_COLS, squareY - c.NUM_ROWS) #Player 1's play board is on the opposite side of his placement board.
             else: #Player 2
-                ship.addSquare(squareX - 10, squareY - 10)
+                ship.addSquare(squareX - c.NUM_COLS, squareY - c.NUM_ROWS) #Same for player 2.
 
     def run(self):
 
@@ -108,8 +108,8 @@ class Battleship:
                 # When the user clicks, do one of three things
                 elif event.type == pg.MOUSEBUTTONDOWN:
                     # Get the mouse position and convert it to an X/Y coordinate on the grid
-                    mousePos = pg.mouse.get_pos()
-                    effectiveX = math.floor(mousePos[0]/(c.SQUARE_SIZE))
+                    mousePos = pg.mouse.get_pos() #mousePos within the game window
+                    effectiveX = math.floor(mousePos[0]/(c.SQUARE_SIZE)) #Pixel Count/Pixels per square == Cell that the mouse clicked on.
                     effectiveY = math.floor(mousePos[1]/(c.SQUARE_SIZE))
                     player_name = "P" + str(2-int(gs.is_P1_turn)) # P1 or P2
 
@@ -141,8 +141,8 @@ class Battleship:
                         enemy_ships = gs.p2Ships if gs.is_P1_turn else gs.p1Ships
 
                         # If the player fired at an open space on the correct board
-                        if (0 < effectiveY < 10 and 
-                            (0 if gs.is_P1_turn else 10) < effectiveX < (10 if gs.is_P1_turn else 20) and 
+                        if (0 < effectiveY < c.NUM_ROWS and
+                            (0 if gs.is_P1_turn else c.NUM_ROWS) < effectiveX < (c.NUM_COLS if gs.is_P1_turn else (c.NUM_COLS*2)) and 
                             gs.grid.grid[effectiveY][effectiveX] == "Open"
                         ):
                             gs.grid.shoot(effectiveY, effectiveX)

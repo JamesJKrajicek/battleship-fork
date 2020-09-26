@@ -81,10 +81,10 @@ class BattleshipView:
                     self.screen.blit(self.hit, (column * c.SQUARE_SIZE, row * c.SQUARE_SIZE))
                 elif gs.grid.grid[row][column] == "miss": # Draw miss marker
                     self.screen.blit(self.miss, (column * c.SQUARE_SIZE, row * c.SQUARE_SIZE))
-                if row % 10 == 0:
+                if row % (c.NUM_ROWS) == 0:
                     # Draw a thick horizontal seperator between boards
                     pg.draw.line(self.screen, c.BLACK, (row * c.SQUARE_SIZE, 0), (row * c.SQUARE_SIZE, c.WIN_Y), 5)
-                    if column % 10 == 0: 
+                    if column % (c.NUM_COLS) == 0: 
                         # Draw a thick vertical seperator AND skip axis label in board corners by "continue"
                         pg.draw.line(self.screen, c.BLACK, (0, column * c.SQUARE_SIZE), (c.WIN_X, column * c.SQUARE_SIZE), 5)
                         continue

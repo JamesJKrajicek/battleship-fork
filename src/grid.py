@@ -2,9 +2,9 @@ import src.constants as c
 class Grid:
     def __init__(self):
         self.grid = []
-        for row in range(c.NUM_ROWS):
+        for row in range(c.NUM_ROWS*2):
             self.grid.append([])
-            for column in range (c.NUM_ROWS):
+            for column in range (c.NUM_COLS*2):
                 self.grid[row].append("Open")
     def shoot(self, y, x):
         if x >= 1 and x <= 9: # Player 1
