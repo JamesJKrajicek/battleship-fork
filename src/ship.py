@@ -1,5 +1,5 @@
 class ShipNode:
-    def __init__(self, x, y):
+    def __init__(self, x, y): #self is like using 'this' to access the base class from the initalization function. W3 defn: "A reference to the current instance of the class, and is used to access variables that belongs to the class."
 
         """
         @pre none
@@ -12,7 +12,7 @@ class ShipNode:
         self.hit = False
 
 class Ship:
-    def __init__(self):
+    def __init__(self): #W3 defn: "A reference to the current instance of the class, and is used to access variables that belongs to the class."
 
         """
         @pre none
@@ -20,7 +20,7 @@ class Ship:
         @param none
         """
 
-        self.shipSquares = []
+        self.shipSquares = [] #The squares that the ships occupy.
         self.sunk = False
 
     def checkSunk(self):

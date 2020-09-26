@@ -68,31 +68,31 @@ class BattleshipView:
         # Render message centered below board
         text = self.msg_font.render(gs.msg, 1, c.WHITE)
         self.screen.blit(text, text.get_rect(centerx=c.WIN_X//2, top=c.WIN_Y))
-        
+        #blit(image, (left, top). Draw the image to the screen at the given position.
         # Loop through all squares on the grid
-        for i in range(len(gs.grid.grid)):
-            for j in range(len(gs.grid.grid[0])):
-                # Draw thin vertical line on grid
-                pg.draw.line(self.screen, c.BLACK, (j * c.SQUARE_SIZE, 0), (j * c.SQUARE_SIZE, c.WIN_Y), 1)
+        for row in range(len(gs.grid.grid)): #row
+            for column in range(len(gs.grid.grid[0])): #column
+                # Draw thin vertical grid lines.
+                pg.draw.line(self.screen, c.BLACK, (column * c.SQUARE_SIZE, 0), (column * c.SQUARE_SIZE, c.WIN_Y), 1)
                 # If the square is a ship, draw the ship only when that player is placing
-                if gs.grid.grid[i][j] == "Ship" and gs.is_placing and i > 10 and ((gs.is_P1_turn and j < 10) or (not gs.is_P1_turn and j > 10)):
-                    pg.draw.rect(self.screen, c.RED, (j * c.SQUARE_SIZE, i * c.SQUARE_SIZE, c.SQUARE_SIZE, c.SQUARE_SIZE))
-                elif gs.grid.grid[i][j] == "hit": # Draw hit marker
-                    self.screen.blit(self.hit, (j * c.SQUARE_SIZE, i * c.SQUARE_SIZE, c.SQUARE_SIZE, c.SQUARE_SIZE))
-                elif gs.grid.grid[i][j] == "miss": # Draw miss marker
-                    self.screen.blit(self.miss, (j * c.SQUARE_SIZE, i * c.SQUARE_SIZE, c.SQUARE_SIZE, c.SQUARE_SIZE))
-                if i % 10 == 0:
+                if gs.grid.grid[row][column] == "Ship" and gs.is_placing and row > 10 and ((gs.is_P1_turn and column < 10) or (not gs.is_P1_turn and column > 10)):
+                    pg.draw.rect(self.screen, c.RED, (column * c.SQUARE_SIZE, row * c.SQUARE_SIZE, c.SQUARE_SIZE, c.SQUARE_SIZE))
+                elif gs.grid.grid[row][column] == "hit": # Draw hit marker
+                    self.screen.blit(self.hit, (column * c.SQUARE_SIZE, row * c.SQUARE_SIZE))
+                elif gs.grid.grid[row][column] == "miss": # Draw miss marker
+                    self.screen.blit(self.miss, (column * c.SQUARE_SIZE, row * c.SQUARE_SIZE))
+                if row % (c.NUM_ROWS) == 0:
                     # Draw a thick horizontal seperator between boards
-                    pg.draw.line(self.screen, c.BLACK, (i * c.SQUARE_SIZE, 0), (i * c.SQUARE_SIZE, c.WIN_Y), 5)
-                    if j % 10 == 0: 
+                    pg.draw.line(self.screen, c.BLACK, (row * c.SQUARE_SIZE, 0), (row * c.SQUARE_SIZE, c.WIN_Y), 5)
+                    if column % (c.NUM_COLS) == 0: 
                         # Draw a thick vertical seperator AND skip axis label in board corners by "continue"
-                        pg.draw.line(self.screen, c.BLACK, (0, j * c.SQUARE_SIZE), (c.WIN_X, j * c.SQUARE_SIZE), 5)
+                        pg.draw.line(self.screen, c.BLACK, (0, column * c.SQUARE_SIZE), (c.WIN_X, column * c.SQUARE_SIZE), 5)
                         continue
                     # Draw axis labels
-                    self.screen.blit(self.font.render(c.Alpha[(j - 1) % 10], True, c.BLACK), (int(j * c.SQUARE_SIZE), int(i * c.SQUARE_SIZE)))
-                    self.screen.blit(self.font.render(str(j % 10), True, c.BLACK), (int(i * c.SQUARE_SIZE + c.SQUARE_SIZE / 4), int(j * c.SQUARE_SIZE)))
+                    self.screen.blit(self.font.render(c.Alpha[(column - 1) % 10], True, c.BLACK), (int(column * c.SQUARE_SIZE), int(row * c.SQUARE_SIZE)))
+                    self.screen.blit(self.font.render(str(column % 10), True, c.BLACK), (int(row * c.SQUARE_SIZE + c.SQUARE_SIZE / 4), int(column * c.SQUARE_SIZE)))
             # Draw thin horizontal line on the grid between boards
-            pg.draw.line(self.screen, c.BLACK, (0, i * c.SQUARE_SIZE), (c.WIN_X, i * c.SQUARE_SIZE), 1)
+            pg.draw.line(self.screen, c.BLACK, (0, row * c.SQUARE_SIZE), (c.WIN_X, row * c.SQUARE_SIZE), 1)
         if gs.is_placing:
             #display a mock ship and the direction it's being placed
             mousePos = pg.mouse.get_pos()
