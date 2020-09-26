@@ -11,7 +11,7 @@ class Battleship:
     """
         This class handles the game logic
     """
-    
+
     def __init__(self):
 
         """
@@ -20,12 +20,13 @@ class Battleship:
         @param none
         @author Daniel and Saher
         """
-        
+
         self.view = BattleshipView()
         self.gs = GameState()
         self.gs.msg = "Awaiting number of ships..."
         self.view.draw(self.gs)
         self.gs.numShipsPerPlayer = self.view.get_num_ships()
+        self.gs.playerType = self.view.get_player_type()
 
     def checkValidShip(self, is_P1_turn, effectiveX, effectiveY):
 
@@ -36,7 +37,7 @@ class Battleship:
         @param effectiveX/Y is the converted mouse input mapped to the grid
         @author Daniel, Saher, Drake
         """
-        
+
         # Loop through all "ship squares", checking they are within the correct board and unoccupied
         for i in range(self.gs.lenShip):
             squareX = effectiveX + c.DIRS[self.gs.shipDir][0] * i #c.DIRS is the direction of the ship. 2-D Array Ex. arr[i][j]
@@ -74,6 +75,61 @@ class Battleship:
             else: #Player 2
                 ship.addSquare(squareX - c.NUM_COLS, squareY - c.NUM_ROWS) #Same for player 2.
 
+    def placing(self, effectiveX, effectiveY, gs, player_name):
+        player_ships = gs.p1Ships if gs.is_P1_turn else gs.p2Ships
+
+        if self.checkValidShip(gs.is_P1_turn, effectiveX, effectiveY):
+            newShip = Ship()
+            self.placeShip(gs.is_P1_turn, effectiveX, effectiveY, newShip)
+            player_ships.append(newShip)
+            gs.lenShip += 1
+            gs.msg = "P1 place your " + str(gs.lenShip) + " ship. Press \"R\" to rotate."
+            # If player one finishes placing, reset things for player two's turn
+            if gs.lenShip > gs.numShipsPerPlayer:
+                if gs.is_P1_turn:
+                    gs.msg = "Now P2, place your 1 ship. Press \"R\" to rotate."
+                    gs.shipDir = 0
+                    gs.is_P1_turn = False
+                    gs.lenShip = 1
+                else: #P2 turn
+                    gs.is_P1_turn = True
+                    gs.is_placing = False
+                    gs.is_shooting = True
+                    gs.msg = "All ships placed. P1 shoot first."
+        else:
+            gs.msg = player_name + " invalid ship location! Press \"R\" to rotate."
+
+    def shooting(self, effectiveX, effectiveY, gs, player_name):
+        enemy_ships = gs.p2Ships if gs.is_P1_turn else gs.p1Ships
+
+        # If the player fired at an open space on the correct board
+        if (0 < effectiveY < c.NUM_ROWS and
+            (0 if gs.is_P1_turn else c.NUM_ROWS) < effectiveX < (c.NUM_COLS if gs.is_P1_turn else (c.NUM_COLS*2)) and
+            gs.grid.grid[effectiveY][effectiveX] == "Open"
+        ):
+            gs.grid.shoot(effectiveY, effectiveX)
+            gs.msg = player_name + " miss."
+            gs.is_P1_turn = not gs.is_P1_turn
+            # Find if the space they attacked has an enemy ship
+            for ship in enemy_ships:
+                for square in ship.shipSquares:
+                    # If player hit a ship
+                    if square.x == effectiveX and square.y == effectiveY:
+                        self.view.play_hit_sound()
+                        gs.msg = player_name + " hit!"
+                        square.hit = True
+                        # Check if they sunk the ship
+                        if not ship.sunk and ship.checkSunk():
+                            self.view.play_sunk_sound()
+                            gs.msg = player_name + " sunk a ship!"
+                            # Check if they won the game
+                            if gs.grid.check_winner(gs.numShipsPerPlayer):
+                                gs.msg = player_name + " wins!"
+                                gs.is_shooting = False
+                        break
+        else:
+            gs.msg = player_name + " invalid space! Try again."
+
     def run(self):
 
         """
@@ -81,7 +137,7 @@ class Battleship:
         @post The game starts. The function finishes when the game finishes.
         @author Saher and Daniel
         """
-        
+
         # Initialize the clock to control framerate
         clock = pg.time.Clock()
 
@@ -92,7 +148,7 @@ class Battleship:
         gs.p1Ships = []
         gs.p2Ships = []
         gs.msg = "First P1, place your 1 ship. Press 'R' to rotate."
-        
+
         # Game loop
         while 1:
             # Loop through all events
@@ -114,59 +170,10 @@ class Battleship:
                     player_name = "P" + str(2-int(gs.is_P1_turn)) # P1 or P2
 
                     if gs.is_placing:
-                        player_ships = gs.p1Ships if gs.is_P1_turn else gs.p2Ships
-                        
-                        if self.checkValidShip(gs.is_P1_turn, effectiveX, effectiveY):
-                            newShip = Ship()
-                            self.placeShip(gs.is_P1_turn, effectiveX, effectiveY, newShip)
-                            player_ships.append(newShip)
-                            gs.lenShip += 1
-                            gs.msg = "P1 place your " + str(gs.lenShip) + " ship. Press \"R\" to rotate."
-                            # If player one finishes placing, reset things for player two's turn
-                            if gs.lenShip > gs.numShipsPerPlayer:
-                                if gs.is_P1_turn:
-                                    gs.msg = "Now P2, place your 1 ship. Press \"R\" to rotate."
-                                    gs.shipDir = 0
-                                    gs.is_P1_turn = False
-                                    gs.lenShip = 1
-                                else: #P2 turn
-                                    gs.is_P1_turn = True
-                                    gs.is_placing = False
-                                    gs.is_shooting = True
-                                    gs.msg = "All ships placed. P1 shoot first."
-                        else:
-                            gs.msg = player_name + " invalid ship location! Press \"R\" to rotate."
+                        self.placing(effectiveX, effectiveY, gs, player_name)
 
                     elif gs.is_shooting:
-                        enemy_ships = gs.p2Ships if gs.is_P1_turn else gs.p1Ships
-
-                        # If the player fired at an open space on the correct board
-                        if (0 < effectiveY < c.NUM_ROWS and
-                            (0 if gs.is_P1_turn else c.NUM_ROWS) < effectiveX < (c.NUM_COLS if gs.is_P1_turn else (c.NUM_COLS*2)) and 
-                            gs.grid.grid[effectiveY][effectiveX] == "Open"
-                        ):
-                            gs.grid.shoot(effectiveY, effectiveX)
-                            gs.msg = player_name + " miss."
-                            gs.is_P1_turn = not gs.is_P1_turn
-                            # Find if the space they attacked has an enemy ship
-                            for ship in enemy_ships:
-                                for square in ship.shipSquares:
-                                    # If player hit a ship
-                                    if square.x == effectiveX and square.y == effectiveY:
-                                        self.view.play_hit_sound()
-                                        gs.msg = player_name + " hit!"
-                                        square.hit = True
-                                        # Check if they sunk the ship
-                                        if not ship.sunk and ship.checkSunk():
-                                            self.view.play_sunk_sound()
-                                            gs.msg = player_name + " sunk a ship!"
-                                            # Check if they won the game
-                                            if gs.grid.check_winner(gs.numShipsPerPlayer):
-                                                gs.msg = player_name + " wins!"
-                                                gs.is_shooting = False
-                                        break
-                        else:
-                            gs.msg = player_name + " invalid space! Try again."
+                        self.shooting(effectiveX, effectiveY, gs, player_name)
             # Update the screen for this frame
             self.view.draw(gs)
             # Advance the while loop at increments of 60FPS
