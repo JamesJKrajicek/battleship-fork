@@ -10,7 +10,7 @@ class BattleshipView:
         This class handles all of the GUI components of the game
     """
     def __init__(self):
-    
+
         # Center window
         os.environ['SDL_VIDEO_CENTERED'] = '1'
         # Initialize pygame
@@ -23,7 +23,7 @@ class BattleshipView:
         pg.display.set_caption("Battleship by team 14, upgraded by team 13")
         # Initialize the screen to the desired size
         self.screen = pg.display.set_mode((c.WIN_X, c.WIN_Y + c.MSG_FONT_SIZE))
-        
+
         # Initialize PyGame assets
         self.boardHighlight = pg.Surface((int(c.WIN_X / 2), int(c.WIN_Y / 2)))
         self.boardHighlight.set_alpha(99)
@@ -35,7 +35,7 @@ class BattleshipView:
         self.hit_sound = pg.mixer.Sound("media/hit.wav")
         self.font = pg.font.Font('freesansbold.ttf', 44)
         self.msg_font = pg.font.Font('freesansbold.ttf', c.MSG_FONT_SIZE)
-        
+
     def get_num_ships(self):
         # Get the number of ships per player, and protect from bad input
         root = tk.Tk()
@@ -46,13 +46,23 @@ class BattleshipView:
             pg.quit()
             sys.exit()
         return numShipsPerPlayer
-        
+
+    def get_player_type(self):
+        root = tk.Tk()
+        root.eval('tk::PlaceWindow . center') # Approximately center the dialog
+        root.withdraw()
+        playerType = tkinter.simpledialog.askinteger("Opponent", "Opponent Type? (1-4)\n1: Player, 2: EasyAI, 3: MediumAI, 4: HardAI.", minvalue=1, maxvalue=4)
+        if playerType is None: # User pressed cancel
+            pg.quit()
+            sys.exit()
+        return playerType
+
     def play_hit_sound(self):
         self.channel1.play(self.hit_sound)
-    
+
     def play_sunk_sound(self):
         self.channel2.play(self.sunk_sound)
-        
+
     def draw(self, gs):
         """
         @pre game is running
@@ -64,7 +74,7 @@ class BattleshipView:
         # Draw the background
         self.screen.blit(self.bg, (0,0))
         pg.draw.rect(self.screen, c.BLACK, (0, c.WIN_Y, c.WIN_X, c.MSG_FONT_SIZE))
-        
+
         # Render message centered below board
         text = self.msg_font.render(gs.msg, 1, c.WHITE)
         self.screen.blit(text, text.get_rect(centerx=c.WIN_X//2, top=c.WIN_Y))
@@ -84,7 +94,7 @@ class BattleshipView:
                 if row % (c.NUM_ROWS) == 0:
                     # Draw a thick horizontal seperator between boards
                     pg.draw.line(self.screen, c.BLACK, (row * c.SQUARE_SIZE, 0), (row * c.SQUARE_SIZE, c.WIN_Y), 5)
-                    if column % (c.NUM_COLS) == 0: 
+                    if column % (c.NUM_COLS) == 0:
                         # Draw a thick vertical seperator AND skip axis label in board corners by "continue"
                         pg.draw.line(self.screen, c.BLACK, (0, column * c.SQUARE_SIZE), (c.WIN_X, column * c.SQUARE_SIZE), 5)
                         continue
@@ -97,7 +107,7 @@ class BattleshipView:
             #display a mock ship and the direction it's being placed
             mousePos = pg.mouse.get_pos()
             pg.draw.line(self.screen, c.RED, (mousePos[0], mousePos[1]), (mousePos[0] + c.SQUARE_SIZE * gs.lenShip * c.DIRS[gs.shipDir][0], mousePos[1] + (c.SQUARE_SIZE * gs.lenShip * c.DIRS[gs.shipDir][1])), 10)
-        
+
         # Highlight the active board
         if gs.is_placing:
             self.screen.blit(self.boardHighlight, ( 0 if gs.is_P1_turn else c.NUM_COLS*c.SQUARE_SIZE,0)) #Right Half is player 2
