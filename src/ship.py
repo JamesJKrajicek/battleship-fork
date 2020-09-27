@@ -29,12 +29,14 @@ class Ship:
         @param none
         @author Daniel
         """
-
-        for square in self.shipSquares:
-            if square.hit == False:
-                return False
-        self.sunk = True
-        return True
+        if (self.sunk == True):
+            return true
+        else:
+            for square in self.shipSquares: #If there is at least one square in the ship object that isn't hit then the ship is not sunk.
+                if square.hit == False:
+                    return False
+            self.sunk = True
+            return True
 
     def addSquare(self, x, y):
 

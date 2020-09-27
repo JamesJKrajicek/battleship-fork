@@ -75,7 +75,7 @@ class BattleshipView:
                 # Draw thin vertical grid lines.
                 pg.draw.line(self.screen, c.BLACK, (column * c.SQUARE_SIZE, 0), (column * c.SQUARE_SIZE, c.WIN_Y), 1)
                 # If the square is a ship, draw the ship only when that player is placing
-                if gs.grid.grid[row][column] == "Ship" and gs.is_placing and row > 10 and ((gs.is_P1_turn and column < 10) or (not gs.is_P1_turn and column > 10)):
+                if gs.grid.grid[row][column] == "Ship" and gs.is_placing and ((gs.is_P1_turn and column < 10) or (not gs.is_P1_turn and column > 10)):
                     pg.draw.rect(self.screen, c.RED, (column * c.SQUARE_SIZE, row * c.SQUARE_SIZE, c.SQUARE_SIZE, c.SQUARE_SIZE))
                 elif gs.grid.grid[row][column] == "hit": # Draw hit marker
                     self.screen.blit(self.hit, (column * c.SQUARE_SIZE, row * c.SQUARE_SIZE))
@@ -99,10 +99,8 @@ class BattleshipView:
             pg.draw.line(self.screen, c.RED, (mousePos[0], mousePos[1]), (mousePos[0] + c.SQUARE_SIZE * gs.lenShip * c.DIRS[gs.shipDir][0], mousePos[1] + (c.SQUARE_SIZE * gs.lenShip * c.DIRS[gs.shipDir][1])), 10)
         
         # Highlight the active board
-        if gs.is_placing or gs.is_shooting:
-            self.screen.blit(self.boardHighlight, (
-                int(not gs.is_P1_turn)*10*c.SQUARE_SIZE, # Right half if player 2
-                int(gs.is_placing)*10*c.SQUARE_SIZE, # Bottom half if placing
-                10*c.SQUARE_SIZE, 10*c.SQUARE_SIZE))
-        
+        if gs.is_placing:
+            self.screen.blit(self.boardHighlight, ( 0 if gs.is_P1_turn else c.NUM_COLS*c.SQUARE_SIZE,0)) #Right Half is player 2
+        elif gs.is_shooting:
+            self.screen.blit(self.boardHighlight, (c.NUM_COLS*c.SQUARE_SIZE if gs.is_P1_turn else 0, 0))
         pg.display.update()

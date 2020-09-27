@@ -42,8 +42,8 @@ class Battleship:
             squareX = effectiveX + c.DIRS[self.gs.shipDir][0] * i #c.DIRS is the direction of the ship. 2-D Array Ex. arr[i][j]
             squareY = effectiveY + c.DIRS[self.gs.shipDir][1] * i
             # If the Y coordinate is not in the bottom board area, the ship is not valid
-            if (squareY >= (c.NUM_ROWS*2) or # Bottom edge
-                squareY <= (c.NUM_ROWS) or # Top edge
+            if (squareY >= (c.NUM_ROWS) or # Bottom edge
+                squareY <= (0) or # Top edge
                 squareX <= (0 if is_P1_turn else c.NUM_COLS) or # Left edge
                 squareX >= (c.NUM_COLS if is_P1_turn else (c.NUM_COLS*2)) or # Right edge
                 self.gs.grid.grid[squareY][squareX] != "Open"): # Space occupied
@@ -61,6 +61,7 @@ class Battleship:
         @param is_P1_turn indicates if player 1 is the one placing (otherwise player 2)
         @param Ship is the ship to be placed
         @author Daniel
+        @author James Krajicek
         """
 
         # Loop through all "ship squares" and place them on the grid
@@ -68,11 +69,7 @@ class Battleship:
             squareX = effectiveX + c.DIRS[self.gs.shipDir][0] * i
             squareY = effectiveY + c.DIRS[self.gs.shipDir][1] * i
             self.gs.grid.grid[squareY][squareX] = "Ship"
-            # The -10 and +10 for squareX is because the placing and attacking boards are on opposite sides. #Placement
-            if is_P1_turn:
-                ship.addSquare(squareX + c.NUM_COLS, squareY - c.NUM_ROWS) #Player 1's play board is on the opposite side of his placement board.
-            else: #Player 2
-                ship.addSquare(squareX - c.NUM_COLS, squareY - c.NUM_ROWS) #Same for player 2.
+            ship.addSquare(squareX, squareY) #Same for both players.
 
     def run(self):
 
@@ -142,22 +139,22 @@ class Battleship:
 
                         # If the player fired at an open space on the correct board
                         if (0 < effectiveY < c.NUM_ROWS and
-                            (0 if gs.is_P1_turn else c.NUM_ROWS) < effectiveX < (c.NUM_COLS if gs.is_P1_turn else (c.NUM_COLS*2)) and 
-                            gs.grid.grid[effectiveY][effectiveX] == "Open"
+                            ((c.NUM_COLS if gs.is_P1_turn else 0) < effectiveX < ((c.NUM_COLS*2) if gs.is_P1_turn else c.NUM_COLS)) and 
+                            ((gs.grid.grid[effectiveY][effectiveX] == "Open") or (gs.grid.grid[effectiveY][effectiveX] == "Ship")) 
                         ):
                             gs.grid.shoot(effectiveY, effectiveX)
                             gs.msg = player_name + " miss."
                             gs.is_P1_turn = not gs.is_P1_turn
                             # Find if the space they attacked has an enemy ship
-                            for ship in enemy_ships:
-                                for square in ship.shipSquares:
+                            for ship in enemy_ships: #For each ship element in the array of enemy ships (assigned above) do the following:
+                                for square in ship.shipSquares: #For each square contained in the target ship's array of squares do the following:
                                     # If player hit a ship
-                                    if square.x == effectiveX and square.y == effectiveY:
+                                    if square.x == effectiveX and square.y == effectiveY: #If the point you clicked on is at the same location as a square contained by the ship then do the following:
                                         self.view.play_hit_sound()
                                         gs.msg = player_name + " hit!"
                                         square.hit = True
                                         # Check if they sunk the ship
-                                        if not ship.sunk and ship.checkSunk():
+                                        if ship.checkSunk():
                                             self.view.play_sunk_sound()
                                             gs.msg = player_name + " sunk a ship!"
                                             # Check if they won the game
