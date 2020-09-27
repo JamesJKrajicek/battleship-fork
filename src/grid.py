@@ -7,21 +7,12 @@ class Grid:
             for column in range (c.NUM_COLS*2):
                 self.grid[row].append("Open")
     def shoot(self, y, x):
-        if x >= 1 and x <= 9: # Player 1
-            if self.grid[y-10][x+10] == "Ship":
-                self.grid[y][x] = "hit"
-                #print("hit ship")            
-            else:
-                self.grid[y][x] = "miss"
-                #print("You Missed")
-        elif x >= 10 and y <= 20: # Player 2
-            if self.grid[y-10][x-10] == "Ship":
-                self.grid[y][x] = "hit"
-                #print("hit ship")
-            else:
-                self.grid[y][x] = "miss"
-                #print("You Missed")
-
+        if self.grid[y][x] == "Ship":
+            self.grid[y][x] = "hit"
+            #print("hit ship")            
+        else:
+            self.grid[y][x] = "miss"
+            #print("You Missed")
     def check_winner(self, win_ships):
         p1_count = 0
         p2_count = 0
