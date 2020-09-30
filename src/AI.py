@@ -12,9 +12,9 @@ class AI:
         """
         docstring
         """
-        if self.difficulty == 1:
+        if self.difficulty == 2:
             self.easy()
-        elif self.difficulty == 2:
+        elif self.difficulty == 3:
             self.medium()
         else:
             self.hard()

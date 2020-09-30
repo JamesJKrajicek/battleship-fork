@@ -155,7 +155,21 @@ class Battleship:
                     # If the user types "r" and someone is placing, rotate to the next direction
                     if event.key == pg.K_r and gs.is_placing:
                         gs.shipDir = (gs.shipDir + 1) % len(c.DIRS)
-                # When the user clicks, do one of three things
+                
+
+
+                if not gs.is_P1_turn and not gs.playerType == 1:
+                    effectiveX = 0 #send to AI
+                    effectiveY = 0 #send to AI
+                    player_name = "P" + str(2-int(gs.is_P1_turn)) # P1 or P2
+
+                    if gs.is_placing:
+                        self.placing(effectiveX, effectiveY, gs, player_name)
+
+                    elif gs.is_shooting:
+                        self.shooting(effectiveX, effectiveY, gs, player_name)                    
+
+                # When the user clicks, do one of three things  
                 elif event.type == pg.MOUSEBUTTONDOWN:
                     # Get the mouse position and convert it to an X/Y coordinate on the grid
                     mousePos = pg.mouse.get_pos() #mousePos within the game window
