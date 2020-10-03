@@ -6,6 +6,7 @@ from src.GameState import GameState
 from src.grid import Grid
 from src.ship import Ship, ShipNode
 import src.constants as c
+from src.AI import AI
 
 class Battleship:
     """
@@ -27,6 +28,8 @@ class Battleship:
         self.view.draw(self.gs)
         self.gs.numShipsPerPlayer = self.view.get_num_ships()
         self.gs.playerType = self.view.get_player_type()
+        if not self.gs.playerType == 1:
+            self.AI = AI(self.gs.playerType)
 
     def checkValidShip(self, is_P1_turn, effectiveX, effectiveY):
 
@@ -74,7 +77,6 @@ class Battleship:
 
     def placing(self, effectiveX, effectiveY, gs, player_name):
         player_ships = gs.p1Ships if gs.is_P1_turn else gs.p2Ships
-
         if self.checkValidShip(gs.is_P1_turn, effectiveX, effectiveY):
             newShip = Ship()
             self.placeShip(gs.is_P1_turn, effectiveX, effectiveY, newShip)
@@ -155,19 +157,18 @@ class Battleship:
                     # If the user types "r" and someone is placing, rotate to the next direction
                     if event.key == pg.K_r and gs.is_placing:
                         gs.shipDir = (gs.shipDir + 1) % len(c.DIRS)
-                
-
 
                 if not gs.is_P1_turn and not gs.playerType == 1:
-                    effectiveX = 0 #send to AI
-                    effectiveY = 0 #send to AI
+                    effectiveX, effectiveY  = self.AI.shipPlacement()
                     player_name = "P" + str(2-int(gs.is_P1_turn)) # P1 or P2
 
                     if gs.is_placing:
                         self.placing(effectiveX, effectiveY, gs, player_name)
 
                     elif gs.is_shooting:
-                        self.shooting(effectiveX, effectiveY, gs, player_name)                    
+                        self.shooting(effectiveX, effectiveY, gs, player_name)     
+
+                    break               
 
                 # When the user clicks, do one of three things  
                 elif event.type == pg.MOUSEBUTTONDOWN:

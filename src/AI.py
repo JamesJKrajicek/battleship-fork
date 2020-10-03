@@ -1,3 +1,5 @@
+import random as r
+
 class AI:
     """
     docstring
@@ -9,6 +11,15 @@ class AI:
         self.difficulty = difficulty
 
     def shipPlacement(self):
+        """
+        docstring
+        """
+        xcoord = r.randint(9,19)
+        ycoord = r.randint(1,9)
+        #coord = [xcoord, ycoord]
+        return (xcoord, ycoord)
+
+    def shooting(self):
         """
         docstring
         """
