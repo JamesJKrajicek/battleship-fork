@@ -175,12 +175,12 @@ class Battleship:
                     effectiveX = math.floor(mousePos[0]/(c.SQUARE_SIZE)) #Pixel Count/Pixels per square == Cell that the mouse clicked on.
                     effectiveY = math.floor(mousePos[1]/(c.SQUARE_SIZE))
                     player_name = "P1" if gs.is_P1_turn else "P2"
+                    if (event.button == 1): #Left Butt Click
+                        if gs.is_placing:
+                            self.placing(effectiveX, effectiveY, gs, player_name)
 
-                    if gs.is_placing:
-                        self.placing(effectiveX, effectiveY, gs, player_name)
-
-                    elif gs.is_shooting:
-                        self.shooting(effectiveX, effectiveY, gs, player_name)
+                        else:
+                            self.shooting(effectiveX, effectiveY, gs, player_name)
 
             if not gs.is_P1_turn and not gs.playerType == 1:
                 effectiveX, effectiveY  = self.AI.shipPlacement(gs)
@@ -195,4 +195,7 @@ class Battleship:
             # Update the screen for this frame
             self.view.draw(gs)
             # Advance the while loop at increments of 60FPS
-            clock.tick(60)
+            if (gs.is_placing):
+                clock.tick(60) #Buttery smooth ship placement.
+            else:
+                clock.tick(15) #Chad level fps

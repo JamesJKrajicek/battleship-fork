@@ -102,21 +102,20 @@ class BattleshipView:
         # Loop through all squares on the grid, drawing the space contents, grid lines, and axis labels
         for row in range(len(gs.grid.grid)): #row
             for column in range(len(gs.grid.grid[0])): #column
-                # Draw a thick vertical seperator AND skip axis label in board corners by "continue"
-                pg.draw.line(self.screen, c.BLACK, (c.WIN_X/2, 0), (c.WIN_X/2, c.WIN_Y), 5)
-                # Draw thin vertical grid lines.
-                pg.draw.line(self.screen, c.BLACK, (column * c.SQUARE_SIZE, 0), (column * c.SQUARE_SIZE, c.WIN_Y), 1)
-                # Draw thin horizontal line on the grid between boards
-                pg.draw.line(self.screen, c.BLACK, (0, row * c.SQUARE_SIZE), (c.WIN_X, row * c.SQUARE_SIZE), 1)
-                
                 # If the square is a ship, draw the ship only when that player is placing
-                if gs.grid.grid[row][column] == "Ship" and gs.is_placing and ((gs.is_P1_turn and column < 10) or (not gs.is_P1_turn and column > 10)):
+                if gs.grid.grid[row][column] == "Ship" and ((gs.is_P1_turn and column < 10) or (not gs.is_P1_turn and column > 10)):
                     pg.draw.rect(self.screen, c.RED, (column * c.SQUARE_SIZE, row * c.SQUARE_SIZE, c.SQUARE_SIZE, c.SQUARE_SIZE))
                 elif gs.grid.grid[row][column] == "hit": # Draw hit marker
                     self.screen.blit(self.hit, (column * c.SQUARE_SIZE, row * c.SQUARE_SIZE))
                 elif gs.grid.grid[row][column] == "miss": # Draw miss marker
                     self.screen.blit(self.miss, (column * c.SQUARE_SIZE, row * c.SQUARE_SIZE))
-                    
+
+                # Draw a thick vertical seperator AND skip axis label in board corners by "continue"
+                pg.draw.line(self.screen, c.BLACK, (c.WIN_X/2, 0), (c.WIN_X/2, c.WIN_Y), 5)
+                # Draw thin vertical grid lines.
+                pg.draw.line(self.screen, c.BLACK, (column * c.SQUARE_SIZE, 0), (column * c.SQUARE_SIZE, c.WIN_Y), 1)
+                # Draw thin horizontal line on the grid between boards
+                pg.draw.line(self.screen, c.BLACK, (0, row * c.SQUARE_SIZE), (c.WIN_X, row * c.SQUARE_SIZE), 1) 
                 # Draw column labels (A, B, C, ...)
                 if row == 0 and column != 0 and column != c.NUM_COLS:
                     self.screen.blit(self.font.render(c.Alpha[(column - 1) % 10], True, c.BLACK), (column * c.SQUARE_SIZE, row))
