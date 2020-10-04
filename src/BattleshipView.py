@@ -6,11 +6,15 @@ import sys
 import src.constants as c
 
 class BattleshipView:
+    """!
+    This class handles the user interface of the game, including the game window, dialog boxes for selecting the number of ships and opponent, and sound effects.
     """
-        This class handles all of the GUI components of the game
-    """
+    
     def __init__(self):
-
+        """!
+        @pre None
+        @post The PyGame assets are initialized and the game window is created and displayed to the user
+        """
         # Center window
         os.environ['SDL_VIDEO_CENTERED'] = '1'
         # Initialize pygame
@@ -37,6 +41,11 @@ class BattleshipView:
         self.msg_font = pg.font.Font('freesansbold.ttf', c.MSG_FONT_SIZE)
 
     def get_num_ships(self):
+        """!
+        @pre None
+        @post If the user presses cancel, the program exits
+        @return int: The number of ships the selected by the player (1-5)
+        """
         # Get the number of ships per player, and protect from bad input
         root = tk.Tk()
         root.eval('tk::PlaceWindow . center') # Approximately center the dialog
@@ -48,6 +57,11 @@ class BattleshipView:
         return numShipsPerPlayer
 
     def get_player_type(self):
+        """!
+        @pre None
+        @post If the user presses cancel, the program exits
+        @return int: A number indicating which opponent the player is playing agianst (1-4)
+        """
         root = tk.Tk()
         root.eval('tk::PlaceWindow . center') # Approximately center the dialog
         root.withdraw()
@@ -58,19 +72,25 @@ class BattleshipView:
         return playerType
 
     def play_hit_sound(self):
+        """!
+        @pre None
+        @post self.hit_sound starts playing on self.channel1, overriding anything currently playing
+        """
         self.channel1.play(self.hit_sound)
 
     def play_sunk_sound(self):
+        """!
+        @pre None
+        @post self.sunk_sound starts playing on self.channel1, overriding anything currently playing
+        """
         self.channel2.play(self.sunk_sound)
 
     def draw(self, gs):
+        """!
+        @pre gs contains valid values
+        @post The PyGame window is redrawn to reflect the values in gs
+        @param gs GameState: The GameState object representing the current state of the game
         """
-        @pre game is running
-        @post The screen is updated for the next frame
-        @param gs The GameState object representing the current state of the game
-        @author Daniel, Saher, Drake
-        """
-
         # Draw the background
         self.screen.blit(self.bg, (0,0))
         pg.draw.rect(self.screen, c.BLACK, (0, c.WIN_Y, c.WIN_X, c.MSG_FONT_SIZE))

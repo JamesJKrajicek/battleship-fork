@@ -1,9 +1,9 @@
 from src.Battleship import Battleship
 def main():
 
-    """
-    @pre none
-    @post a game of battleship is created and ran
+    """!
+    @pre None
+    @post A game of Battleship is created and played
     """
 
     BShip = Battleship()

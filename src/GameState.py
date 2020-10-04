@@ -2,12 +2,16 @@ from src.grid import Grid
 from src.ship import Ship, ShipNode
 
 class GameState:
+    """!
+    This class stores information about the current state of the game.
+    It is used to easily pass information from Battleship to BattleshipView.
     """
-        This class stores information about the current state of the game.
-        It allows this information to be sent from the controller to the view.
-    """
-
+    
     def __init__(self):
+        """!
+        @pre None
+        @post GameState is initialized with default values for the beginning of the game
+        """
         self.grid = Grid()
         self.shipDir = 0 # Direction of the ship currently being placed (index of c.DIRS)
         self.lenShip = 1 # Length of the ship to place next
