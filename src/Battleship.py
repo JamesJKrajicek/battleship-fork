@@ -9,19 +9,15 @@ import src.constants as c
 from src.AI import AI
 
 class Battleship:
-    """
-        This class handles the game logic
+    """!
+    This class handles the game's core logic, including setup, listening for events from the user, placing ships, attacking, switching turns, and verifying moves are valid.
     """
 
     def __init__(self):
-
-        """
+        """!
         @pre none
-        @post Battleship class is created and is ready to be run
-        @param none
-        @author Daniel and Saher
+        @post The members of the Battleship object are initialized, including the game view and state. The number of ships and opponent are determined and stored in the game state.
         """
-
         self.view = BattleshipView()
         self.gs = GameState()
         self.gs.msg = "Awaiting number of ships..."
@@ -31,20 +27,21 @@ class Battleship:
         if not self.gs.playerType == 1:
             self.AI = AI(self.gs.playerType)
 
-    def checkValidShip(self, is_P1_turn, effectiveX, effectiveY):
-
+    def checkValidShip(self, is_P1_turn, effectiveX, effectiveY, lenShip, shipDir):
+        """!
+        @pre None
+        @post None
+        @param bool: is_P1_turn Indicates if player 1 is the one placing (otherwise player 2)
+        @param effectiveX int: The X-coordinate of the grid the ship is attempting to be placed (0-19)
+        @param effectiveY int: The Y-coordinate of the grid the ship is attempting to be placed (0-9)
+        @param lenShip int: The length of the ship to place (1-5)
+        @param shipDir [int, int]: The direction to place the ship in the form of an [x, y] pair where x and y are -1, 0, or 1 (from c.DIRS)
+        @return bool: Whether the ship fits entirely within the correct player's board and does not overlap an existing ship
         """
-        @pre game is running, one player is placing
-        @post returns true if that ship placement results in no overslow/index errors/another ship is in the way, else false
-        @param is_P1_turn indicates if player 1 is the one placing (otherwise player 2)
-        @param effectiveX/Y is the converted mouse input mapped to the grid
-        @author Daniel, Saher, Drake
-        """
-
         # Loop through all "ship squares", checking they are within the correct board and unoccupied
-        for i in range(self.gs.lenShip):
-            squareX = effectiveX + c.DIRS[self.gs.shipDir][0] * i #c.DIRS is the direction of the ship. 2-D Array Ex. arr[i][j]
-            squareY = effectiveY + c.DIRS[self.gs.shipDir][1] * i
+        for i in range(lenShip):
+            squareX = effectiveX + c.DIRS[shipDir][0] * i #c.DIRS is the direction of the ship. 2-D Array Ex. arr[i][j]
+            squareY = effectiveY + c.DIRS[shipDir][1] * i
             # If the Y coordinate is not in the bottom board area, the ship is not valid
             if (squareY >= (c.NUM_ROWS) or # Bottom edge
                 squareY <= (0) or # Top edge
@@ -56,30 +53,36 @@ class Battleship:
 		# All ship squares are valid, so placement is valid
         return True
 
-    def placeShip(self, is_P1_turn, effectiveX, effectiveY, ship):
-
+    def placeShip(self, ship, effectiveX, effectiveY, lenShip, shipDir):
+        """!
+        @pre effectiveX, effectiveY, lenShip, and shipDir together are a valid ship placement for the current player
+        @post Ship object is placed on self.gs.grid and has its ShipSpaces initialized
+        @param ship Ship: The Ship object to place on the grid and populate with ShipSpaces
+        @param effectiveX int: The X-coordinate of the grid the ship will be placed (0-19)
+        @param effectiveY int: The Y-coordinate of the grid the ship will be placed (0-9)
+        @param lenShip int: The length of the ship to place (1-5)
+        @param shipDir [int, int]: The direction to place the ship in the form of an [x, y] pair where x and y are -1, 0, or 1 (one of c.DIRS)
         """
-        @pre game is running and one of the players is placing
-        @post ship is placed on grid
-        @param effectiveX/Y are the converted mouse inputs
-        @param is_P1_turn indicates if player 1 is the one placing (otherwise player 2)
-        @param Ship is the ship to be placed
-        @author Daniel
-        @author James Krajicek
-        """
-
         # Loop through all "ship squares" and place them on the grid
-        for i in range(self.gs.lenShip):
-            squareX = effectiveX + c.DIRS[self.gs.shipDir][0] * i
-            squareY = effectiveY + c.DIRS[self.gs.shipDir][1] * i
+        for i in range(lenShip):
+            squareX = effectiveX + c.DIRS[shipDir][0] * i
+            squareY = effectiveY + c.DIRS[shipDir][1] * i
             self.gs.grid.grid[squareY][squareX] = "Ship"
             ship.addSquare(squareX, squareY) #Same for both players.
 
     def placing(self, effectiveX, effectiveY, gs, player_name):
+        """!
+        @pre A player has selected a location on the grid to attempt to place a ship
+        @post The message is updated. If the location is valid, the ship is placed and the game proceeds to the next ship placement (or to shooting if all ships placed).
+        @param effectiveX int: The X-coordinate of the grid the ship will attempt to be placed (0-19)
+        @param effectiveY int: The Y-coordinate of the grid the ship will attempt to be placed (0-9)
+        @param gs GameState: The object representing the current state of the game. This will be modified upon successful ship placement.
+        @param player_name string: The name of the current player to include in the message
+        """
         player_ships = gs.p1Ships if gs.is_P1_turn else gs.p2Ships
-        if self.checkValidShip(gs.is_P1_turn, effectiveX, effectiveY):
+        if self.checkValidShip(gs.is_P1_turn, effectiveX, effectiveY, gs.lenShip, gs.shipDir):
             newShip = Ship()
-            self.placeShip(gs.is_P1_turn, effectiveX, effectiveY, newShip)
+            self.placeShip(newShip, effectiveX, effectiveY, gs.lenShip, gs.shipDir)
             player_ships.append(newShip)
             gs.lenShip += 1
             gs.msg = "P1 place your " + str(gs.lenShip) + " ship. Press \"R\" to rotate."
@@ -99,6 +102,14 @@ class Battleship:
             gs.msg = player_name + " invalid ship location! Press \"R\" to rotate."
 
     def shooting(self, effectiveX, effectiveY, gs, player_name):
+        """!
+        @pre A player has selected a location on the grid to attempt to fired
+        @post The message is updated. If the location is valid (correct board and not already attacked), checks for a hit, sink, or win. If not a win, switches turns.
+        @param effectiveX int: The X-coordinate of the grid being fired at (0-19)
+        @param effectiveY int: The Y-coordinate of the grid being fired at (0-9)
+        @param gs GameState: The object representing the current state of the game. This will be modified upon successful firing.
+        @param player_name string: The name of the current player to include in the message
+        """
         enemy_ships = gs.p2Ships if gs.is_P1_turn else gs.p1Ships
         # If the player fired at an open space on the correct board
         if (0 < effectiveY < c.NUM_ROWS and
@@ -126,14 +137,13 @@ class Battleship:
                                 gs.is_shooting = False
         else:
             gs.msg = player_name + " invalid space! Try again."
+            
     def run(self):
-
+        """!
+        Runs the main game loop during gameplay (ship placement and attacking)
+        @pre The number of ships and opponent has been selected
+        @post The game has been exited
         """
-        @pre none
-        @post The game starts. The function finishes when the game finishes.
-        @author Saher and Daniel
-        """
-
         # Initialize the clock to control framerate
         clock = pg.time.Clock()
 
