@@ -159,7 +159,7 @@ class Battleship:
                         gs.shipDir = (gs.shipDir + 1) % len(c.DIRS)       
 
                 # When the user clicks, do one of three things  
-                elif event.type == pg.MOUSEBUTTONDOWN:
+                elif event.type == pg.MOUSEBUTTONDOWN: #NOTE: When AI methods are ready change condition to: gs.is_P1_turn and event.type == pg.MOUSEBUTTONDOWN
                     # Get the mouse position and convert it to an X/Y coordinate on the grid
                     mousePos = pg.mouse.get_pos() #mousePos within the game window
                     effectiveX = math.floor(mousePos[0]/(c.SQUARE_SIZE)) #Pixel Count/Pixels per square == Cell that the mouse clicked on.
@@ -180,7 +180,7 @@ class Battleship:
                     self.placing(effectiveX, effectiveY, gs, player_name)
 
                 elif gs.is_shooting:
-                    self.shooting(effectiveX, effectiveY, gs, player_name)   #Replace with AI shooting method       
+                    self.shooting(effectiveX, effectiveY, gs, player_name) #NOTE: When AI methods are ready replace with: self.AI.shooting()    
         
             # Update the screen for this frame
             self.view.draw(gs)
