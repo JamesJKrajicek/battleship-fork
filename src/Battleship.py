@@ -25,7 +25,7 @@ class Battleship:
         self.gs.numShipsPerPlayer = self.view.get_num_ships()
         self.gs.playerType = self.view.get_player_type()
         if not self.gs.playerType == 1:
-            self.AI = AI(self.gs.playerType)
+            self.ai = AI(self.gs.playerType)
 
     def checkValidShip(self, is_P1_turn, effectiveX, effectiveY, lenShip, shipDir):
         """!
@@ -118,9 +118,10 @@ class Battleship:
         ):
             gs.grid.shoot(effectiveY, effectiveX)
             gs.msg = player_name + " miss."
-            if gs.playerType != 1:
+            if (gs.playerType != 1) and (not gs.is_P1_turn):
+                print("miss")
                 self.ai.hit_shot = False
-            gs.is_P1_turn = not gs.is_P1_turn
+
             # Find if the space they attacked has an enemy ship
             for ship in enemy_ships: #For each ship element in the array of enemy ships (assigned above) do the following:
                 for square in ship.shipSquares: #For each square contained in the target ship's array of squares do the following:
@@ -129,7 +130,8 @@ class Battleship:
                         self.view.play_hit_sound()
                         gs.msg = player_name + " hit!"
                         square.hit = True
-                        if gs.playerType != 1:
+                        if (gs.playerType != 1) and not gs.is_P1_turn:
+                            print("hit")
                             self.ai.hit_shot = True
                         # Check if they sunk the ship
                         if ship.checkSunk():
@@ -139,6 +141,7 @@ class Battleship:
                             if gs.grid.check_winner(gs.numShipsPerPlayer):
                                 gs.msg = player_name + " wins!"
                                 gs.is_shooting = False
+            gs.is_P1_turn = not gs.is_P1_turn
         else:
             gs.msg = player_name + " invalid space! Try again."
 
@@ -187,14 +190,14 @@ class Battleship:
                         self.shooting(effectiveX, effectiveY, gs, player_name)
 
             if not gs.is_P1_turn and not gs.playerType == 1:
-                effectiveX, effectiveY  = self.AI.shipPlacement(gs)
+                effectiveX, effectiveY  = self.ai.shipPlacement(gs)
                 player_name = "P" + str(2-int(gs.is_P1_turn)) # P1 or P2
 
                 if gs.is_placing:
                     self.placing(effectiveX, effectiveY, gs, player_name)
 
                 elif gs.is_shooting:
-                    effectiveX, effectiveY = self.AI.getPoints(gs)
+                    effectiveX, effectiveY = self.ai.getPoints(gs)
                     self.shooting(effectiveX, effectiveY, gs, player_name)
 
 

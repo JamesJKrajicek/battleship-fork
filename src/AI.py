@@ -15,9 +15,9 @@ class AI:
 
         #medium AI data
         self.arr = []
-        for row in range(9):
+        for row in range(10):
             self.arr.append([])
-            for column in range(9):
+            for column in range(10):
                 self.arr[row].append(0)
         self.prev_x = int()
         self.prev_y = int()
@@ -64,7 +64,7 @@ class AI:
         if self.difficulty == 2:
             return self.easy(gs)
         elif self.difficulty == 3:
-            self.medium()
+            return self.medium()
         else:
             return self.hard(gs)
 
@@ -76,7 +76,6 @@ class AI:
                 return x, y
 
     def medium(self):
-<<<<<<< HEAD
         """!
         @pre
         @post
@@ -87,26 +86,28 @@ class AI:
             if self.state == 0:
                 if self.hit_shot:
                     self.arr[self.rand_y] [self.rand_x] = self.hit
+                    self.state = 1
                 else:
                     self.arr[self.rand_y] [self.rand_x] = self.miss
-            elif self.state == 1:
+            if self.state == 1:
                 if self.hit_shot:
                     if self.shot_type == 20:
-                        self.north_hit = true
+                        self.north_hit = True
                     elif self.shot_type == 30:
-                        self.east_hit = true
+                        self.east_hit = True
                     elif self.shot_type == 40:
-                        self.south_hit = true
+                        self.south_hit = True
                     elif self.shot_type == 50:
-                        self.west_hit = true
+                        self.west_hit = True
                     self.arr[self.prev_y] [self.prev_x] = self.hit
                 else:
                     self.arr[self.prev_y] [self.prev_x] = self.miss
-            elif self.state == 2:
+            if self.state == 2:
                 if self.hit_shot:
                     if self.north_hit:
                         self.arr[self.prev_y] [self.prev_x] = self.hit
                     else:
+                        self.arr[self.prev_y] [self.prev_x] = self.miss
                         self.north_hit = False
                 else:
                     self.arr[self.prev_y] [self.prev_x] = self.miss
@@ -114,6 +115,7 @@ class AI:
                     if self.east_hit:
                         self.arr[self.prev_y] [self.prev_x] = self.hit
                     else:
+                        self.arr[self.prev_y] [self.prev_x] = self.miss
                         self.east_hit = False
                 else:
                     self.arr[self.prev_y] [self.prev_x] = self.miss
@@ -121,6 +123,7 @@ class AI:
                     if self.south_hit:
                         self.arr[self.prev_y] [self.prev_x] = self.hit
                     else:
+                        self.arr[self.prev_y] [self.prev_x] = self.miss
                         self.south_hit = False
                 else:
                     self.arr[self.prev_y] [self.prev_x] = self.miss
@@ -128,90 +131,81 @@ class AI:
                     if self.west_hit:
                         self.arr[self.prev_y] [self.prev_x] = self.hit
                     else:
+                        self.arr[self.prev_y] [self.prev_x] = self.miss
                         self.west_hit = False
                 else:
                     self.arr[self.prev_y] [self.prev_x] = self.miss
         #main code
-        if self.state == 0:
-            if self.rand_x == int() or self.rand_y == int():
-                self.rand_x = r.randint(0,8)
-                self.rand_y = r.randint(0,8)
-            else:
-                while self.arr[self.rand_y] [self.rand_x] != 0:
-                    self.rand_x = r.randint(0,8)
-                    self.rand_y = r.randint(0,8)
-            self.shot_type = 10
-            return self.rand_x, self.rand_y
-        elif self.state == 1:
-            if self.shot_type == 10:
-                self.shot_type = self.shot_type + 10
-                if self.rand_y-1 >= 0:
-                    self.prev_y = self.rand_y - 1
-                    self.prev_x = self.prev_x
-                    return self.prev_x, self.prev_y
-            elif self.shot_type == 20:
-                self.shot_type = self.shot_type + 10
-                if self.rand_x+1 < 9:
-                    self.prev_y = self.rand_y
-                    self.prev_x = self.rand_x + 1
-                    return self.prev_x, self.prev_y
-            elif self.shot_type == 30:
-                self.shot_type = self.shot_type + 10
-                if self.rand_y+1 < 9:
-                    self.prev_y = self.rand_y + 1
-                    self.prev_x = self.rand_x
-                    return self.prev_x, self.prev_y
-            elif self.shot_type == 40:
-                self.shot_type = self.shot_type + 10
-                if self.rand_x-1 >= 0:
-                    self.prev_y = self.rand_y
-                    self.prev_x = self.rand_x - 1
-                    return self.prev_x, self.prev_y
-            else:
+        while 1:
+            if self.state == 0:
+                if self.rand_x == int() or self.rand_y == int():
+                    self.rand_x = r.randint(1,9)
+                    self.rand_y = r.randint(1,9)
+                else:
+                    while self.arr[self.rand_y] [self.rand_x] != 0:
+                        self.rand_x = r.randint(1,9)
+                        self.rand_y = r.randint(1,9)
                 self.shot_type = 10
-                self.state = self.state + 1
-        elif self.state == 2:
-            if self.north_hit:
-                if self.rand_y - self.radius >= 0:
-                    self.prev_y = self.rand_y - self.radius
-                    self.prev_x = self.rand_x
-                    return self.prev_x, self.prev_y
+                return self.rand_x, self.rand_y
+            if self.state == 1:
+                if self.shot_type == 10:
+                    self.shot_type = self.shot_type + 10
+                    if self.rand_y-1 > 0:
+                        self.prev_y = self.rand_y - 1
+                        self.prev_x = self.rand_x
+                        return self.prev_x, self.prev_y
+                if self.shot_type == 20:
+                    self.shot_type = self.shot_type + 10
+                    if self.rand_x+1 <= 9:
+                        self.prev_y = self.rand_y
+                        self.prev_x = self.rand_x + 1
+                        return self.prev_x, self.prev_y
+                if self.shot_type == 30:
+                    self.shot_type = self.shot_type + 10
+                    if self.rand_y+1 <= 9:
+                        self.prev_y = self.rand_y + 1
+                        self.prev_x = self.rand_x
+                        return self.prev_x, self.prev_y
+                if self.shot_type == 40:
+                    self.shot_type = self.shot_type + 10
+                    if self.rand_x-1 > 0:
+                        self.prev_y = self.rand_y
+                        self.prev_x = self.rand_x - 1
+                        return self.prev_x, self.prev_y
+                self.shot_type = 10
+                self.state = 2
+            if self.state == 2:
+                if self.north_hit:
+                    if self.rand_y - self.radius > 0:
+                        self.prev_y = self.rand_y - self.radius
+                        self.prev_x = self.rand_x
+                        return self.prev_x, self.prev_y
+                    else:
+                        self.north_hit = False
+                if self.east_hit:
+                    if self.rand_x + self.radius <= 9:
+                        self.prev_x = self.rand_x + self.radius
+                        self.prev_y = self.rand_y
+                        return self.prev_x, self.prev_y
+                    else:
+                        self.east_hit = False
+                if self.south_hit:
+                    if self.rand_y + self.radius <= 9:
+                        self.prev_y = self.rand_y + self.radius
+                        self.prev_x = self.rand_x
+                        return self.prev_x, self.prev_y
+                    else:
+                        self.south_hit = False
+                if self.west_hit:
+                    if self.rand_x - self.radius > 0:
+                        self.prev_x = self.rand_x - self.radius
+                        self.prev_y = self.rand_y
+                        return self.prev_x, self.prev_y
+                    else:
+                        self.west_hit = False
                 else:
-                    self.north_hit = False
-            elif self.east_hit:
-                if self.rand_x + self.radius >= 0:
-                    self.prev_x = self.rand_x + self.radius
-                    self.prev_y = self.rand_y
-                    return self.prev_x, self.prev_y
-                else:
-                    self.east_hit = False
-            elif self.south_hit:
-                if self.rand_y + self.radius >= 0:
-                    self.prev_y = self.rand_y + self.radius
-                    self.prev_x = self.rand_x
-                    return self.prev_x, self.prev_y
-                else:
-                    self.south_hit = False
-            elif self.west_hit:
-                if self.rand_x - self.radius >= 0:
-                    self.prev_x = self.rand_x - self.radius
-                    self.prev_y = self.rand_y
-                    return self.prev_x, self.prev_y
-                else:
-                    self.west_hit = False
-            else:
-                self.state = 1
+                    self.state = 0
 
-    def hard(self):
-        """!
-        @pre
-        @post
-        @return
-        """
-        pass
-=======
-      
-        pass
 
     def hard(self, gs):
 
@@ -222,5 +216,3 @@ class AI:
                     return square.x, square.y
 
         return 1, 1
-
->>>>>>> 7b7c82d8d5254e567d0849d9ecae1fc3953e9a39
