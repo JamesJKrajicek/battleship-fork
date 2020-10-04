@@ -29,7 +29,7 @@ class BattleshipView:
         self.screen = pg.display.set_mode((c.WIN_X, c.WIN_Y + c.MSG_FONT_SIZE))
 
         # Initialize PyGame assets
-        self.boardHighlight = pg.Surface((int(c.WIN_X / 2), int(c.WIN_Y / 2)))
+        self.boardHighlight = pg.Surface((int(c.WIN_X / 2), int(c.WIN_Y)))
         self.boardHighlight.set_alpha(99)
         self.boardHighlight.fill(c.RED)
         self.bg = pg.transform.scale(pg.image.load("media/background-day.jpg"), (c.WIN_X, c.WIN_Y))
@@ -102,8 +102,12 @@ class BattleshipView:
         # Loop through all squares on the grid
         for row in range(len(gs.grid.grid)): #row
             for column in range(len(gs.grid.grid[0])): #column
+                # Draw a thick vertical seperator AND skip axis label in board corners by "continue"
+                pg.draw.line(self.screen, c.BLACK, (c.WIN_X/2, 0), (c.WIN_X/2, c.WIN_Y), 5)
                 # Draw thin vertical grid lines.
                 pg.draw.line(self.screen, c.BLACK, (column * c.SQUARE_SIZE, 0), (column * c.SQUARE_SIZE, c.WIN_Y), 1)
+                # Draw thin horizontal line on the grid between boards
+                pg.draw.line(self.screen, c.BLACK, (0, row * c.SQUARE_SIZE), (c.WIN_X, row * c.SQUARE_SIZE), 1)
                 # If the square is a ship, draw the ship only when that player is placing
                 if gs.grid.grid[row][column] == "Ship" and gs.is_placing and ((gs.is_P1_turn and column < 10) or (not gs.is_P1_turn and column > 10)):
                     pg.draw.rect(self.screen, c.RED, (column * c.SQUARE_SIZE, row * c.SQUARE_SIZE, c.SQUARE_SIZE, c.SQUARE_SIZE))
@@ -111,18 +115,12 @@ class BattleshipView:
                     self.screen.blit(self.hit, (column * c.SQUARE_SIZE, row * c.SQUARE_SIZE))
                 elif gs.grid.grid[row][column] == "miss": # Draw miss marker
                     self.screen.blit(self.miss, (column * c.SQUARE_SIZE, row * c.SQUARE_SIZE))
-                if row % (c.NUM_ROWS) == 0:
-                    # Draw a thick horizontal seperator between boards
-                    pg.draw.line(self.screen, c.BLACK, (row * c.SQUARE_SIZE, 0), (row * c.SQUARE_SIZE, c.WIN_Y), 5)
-                    if column % (c.NUM_COLS) == 0:
-                        # Draw a thick vertical seperator AND skip axis label in board corners by "continue"
-                        pg.draw.line(self.screen, c.BLACK, (0, column * c.SQUARE_SIZE), (c.WIN_X, column * c.SQUARE_SIZE), 5)
+                if row == 0:
+                    if (column == 0 or column == c.NUM_COLS):
                         continue
                     # Draw axis labels
-                    self.screen.blit(self.font.render(c.Alpha[(column - 1) % 10], True, c.BLACK), (int(column * c.SQUARE_SIZE), int(row * c.SQUARE_SIZE)))
-                    self.screen.blit(self.font.render(str(column % 10), True, c.BLACK), (int(row * c.SQUARE_SIZE + c.SQUARE_SIZE / 4), int(column * c.SQUARE_SIZE)))
-            # Draw thin horizontal line on the grid between boards
-            pg.draw.line(self.screen, c.BLACK, (0, row * c.SQUARE_SIZE), (c.WIN_X, row * c.SQUARE_SIZE), 1)
+                    self.screen.blit(self.font.render(c.Alpha[(column - 1) % 10], True, c.BLACK), (int(column * c.SQUARE_SIZE), int(row)))
+                    self.screen.blit(self.font.render(str(column % 10), True, c.BLACK), (int(row + c.SQUARE_SIZE / 4), int(column * c.SQUARE_SIZE)))
         if gs.is_placing:
             #display a mock ship and the direction it's being placed
             mousePos = pg.mouse.get_pos()
