@@ -20,7 +20,7 @@ class AI:
         @param gs GameState: Used by the AI to decide how to place its ship
         @return (int, int): The (X, Y) coordinates the AI wants to place the ship at
         """
-        gs.shipDir = (gs.shipDir + 1) % len(c.DIRS) #Generates number between 0-3 for direction change
+        gs.shipDir = r.randint(0, len(c.DIRS)-1) #Generates number between 0-3 for direction change
         xcoord = r.randint(c.NUM_ROWS-1 ,2*c.NUM_ROWS-1) #Generates number between 9-19 (boundaries of second board)
         ycoord = r.randint(1, c.NUM_COLS-1) #Generates number between 1 and 9 (boundaries of boards)
         return (xcoord, ycoord)
