@@ -5,10 +5,10 @@ import string
 """
 
 MSG_FONT_SIZE = 20 #pixels
-SQUARE_SIZE = 30 #pixels
+SQUARE_SIZE = 40 #pixels
 NUM_ROWS = 10 #row count
 NUM_COLS = 10 # column count
-WIN_Y = SQUARE_SIZE * (NUM_ROWS*2)
+WIN_Y = SQUARE_SIZE * (NUM_ROWS)
 WIN_X = SQUARE_SIZE * (NUM_COLS*2)
 WHITE = [255,255,255]
 BLACK = [0,0,0]
