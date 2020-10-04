@@ -10,7 +10,7 @@ class Grid:
         @post The grid is initialzed to contain all empty spaces
         """
         self.grid = []
-        for row in range(c.NUM_ROWS*2):
+        for row in range(c.NUM_ROWS):
             self.grid.append([])
             for column in range(c.NUM_COLS*2):
                 self.grid[row].append("Open")
