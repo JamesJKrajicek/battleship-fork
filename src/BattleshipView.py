@@ -37,7 +37,7 @@ class BattleshipView:
         self.miss = pg.transform.scale(pg.image.load("media/blackX.png"), (c.SQUARE_SIZE, c.SQUARE_SIZE))
         self.sunk_sound = pg.mixer.Sound("media/sunk.wav")
         self.hit_sound = pg.mixer.Sound("media/hit.wav")
-        self.font = pg.font.Font('freesansbold.ttf', 44)
+        self.font = pg.font.Font('freesansbold.ttf', c.AXIS_FONT_SIZE)
         self.msg_font = pg.font.Font('freesansbold.ttf', c.MSG_FONT_SIZE)
 
     def get_num_ships(self):
@@ -98,8 +98,8 @@ class BattleshipView:
         # Render message centered below board
         text = self.msg_font.render(gs.msg, 1, c.WHITE)
         self.screen.blit(text, text.get_rect(centerx=c.WIN_X//2, top=c.WIN_Y))
-        #blit(image, (left, top). Draw the image to the screen at the given position.
-        # Loop through all squares on the grid
+
+        # Loop through all squares on the grid, drawing the space contents, grid lines, and axis labels
         for row in range(len(gs.grid.grid)): #row
             for column in range(len(gs.grid.grid[0])): #column
                 # Draw a thick vertical seperator AND skip axis label in board corners by "continue"
@@ -108,6 +108,7 @@ class BattleshipView:
                 pg.draw.line(self.screen, c.BLACK, (column * c.SQUARE_SIZE, 0), (column * c.SQUARE_SIZE, c.WIN_Y), 1)
                 # Draw thin horizontal line on the grid between boards
                 pg.draw.line(self.screen, c.BLACK, (0, row * c.SQUARE_SIZE), (c.WIN_X, row * c.SQUARE_SIZE), 1)
+                
                 # If the square is a ship, draw the ship only when that player is placing
                 if gs.grid.grid[row][column] == "Ship" and gs.is_placing and ((gs.is_P1_turn and column < 10) or (not gs.is_P1_turn and column > 10)):
                     pg.draw.rect(self.screen, c.RED, (column * c.SQUARE_SIZE, row * c.SQUARE_SIZE, c.SQUARE_SIZE, c.SQUARE_SIZE))
@@ -115,12 +116,15 @@ class BattleshipView:
                     self.screen.blit(self.hit, (column * c.SQUARE_SIZE, row * c.SQUARE_SIZE))
                 elif gs.grid.grid[row][column] == "miss": # Draw miss marker
                     self.screen.blit(self.miss, (column * c.SQUARE_SIZE, row * c.SQUARE_SIZE))
-                if row == 0:
-                    if (column == 0 or column == c.NUM_COLS):
-                        continue
-                    # Draw axis labels
-                    self.screen.blit(self.font.render(c.Alpha[(column - 1) % 10], True, c.BLACK), (int(column * c.SQUARE_SIZE), int(row)))
-                    self.screen.blit(self.font.render(str(column % 10), True, c.BLACK), (int(row + c.SQUARE_SIZE / 4), int(column * c.SQUARE_SIZE)))
+                    
+                # Draw column labels (A, B, C, ...)
+                if row == 0 and column != 0 and column != c.NUM_COLS:
+                    self.screen.blit(self.font.render(c.Alpha[(column - 1) % 10], True, c.BLACK), (column * c.SQUARE_SIZE, row))
+                    
+                # Draw row labels (1, 2, 3, ...)
+                if row != 0 and (column == 0 or column == c.NUM_COLS):
+                    self.screen.blit(self.font.render(str(row), True, c.BLACK), (int(column*c.SQUARE_SIZE + c.SQUARE_SIZE/4), row * c.SQUARE_SIZE))
+                    
         if gs.is_placing:
             #display a mock ship and the direction it's being placed
             mousePos = pg.mouse.get_pos()
@@ -131,4 +135,5 @@ class BattleshipView:
             self.screen.blit(self.boardHighlight, ( 0 if gs.is_P1_turn else c.NUM_COLS*c.SQUARE_SIZE,0)) #Right Half is player 2
         elif gs.is_shooting:
             self.screen.blit(self.boardHighlight, (c.NUM_COLS*c.SQUARE_SIZE if gs.is_P1_turn else 0, 0))
+            
         pg.display.update()
