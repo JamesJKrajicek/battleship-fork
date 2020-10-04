@@ -194,7 +194,9 @@ class Battleship:
                     self.placing(effectiveX, effectiveY, gs, player_name)
 
                 elif gs.is_shooting:
-                    self.shooting(effectiveX, effectiveY, gs, player_name) #NOTE: When AI methods are ready replace with: self.AI.shooting()
+                    effectiveX, effectiveY = self.AI.getPoints(gs)
+                    self.shooting(effectiveX, effectiveY, gs, player_name)
+
 
             # Update the screen for this frame
             self.view.draw(gs)
