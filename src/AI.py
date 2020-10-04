@@ -39,27 +39,10 @@ class AI:
             return self.hard(gs)
 
     def easy(self, gs):
-     
-        enemy_ships = gs.p2Ships if gs.is_P1_turn else gs.p1Ships
-        squares = []
-        for ship in enemy_ships:
-            for square in ship.shipSquares:
-                squares.append(square)
-
         while True:
             x = r.randint(1, 9)
             y = r.randint(1, 9)
-
-            flag = True
-            for square in squares:
-                if square.x == x and square.y == y:
-                    if not square.hit:
-                        return x, y
-                    else:
-                        flag = False
-                        break
-
-            if flag:
+            if((gs.grid.grid[y][x] == "Open") or (gs.grid.grid[y][x] == "Ship")):
                 return x, y
 
     def medium(self):
