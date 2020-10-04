@@ -9,10 +9,9 @@ Team 14: Saher Elsayed, Daniel Johnson, Trieu-Anh Nguyen, Maokun Huang, Rahul Pu
 - Install pygame module using ‘pip install -U pygame --user’
 - On Windows: In command line, navigate to the project file and run ‘main.py'
 
-## View documentation
+## [View documentation](http://eecs448-locked-in-coders.github.io/battleship-fork/documentation/index.html)
 - In the documentation folder, open index.html to view code documentation.
 
 ## Works cited
-- [Python 3](https://www.python.org/), with its built-in os, math, string, and sys modules
-- [tkinter](https://docs.python.org/3/library/tkinter.html), for dialog boxes
+- [Python 3](https://www.python.org/), with its built-in os, math, string, sys, and tkinter modules
 - [pygame](https://pypi.org/project/Pygame/), for game graphics and sounds
