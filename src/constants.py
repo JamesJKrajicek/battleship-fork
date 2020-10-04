@@ -4,8 +4,9 @@ import string
 This file store constants referenced in other modules
 """
 
-MSG_FONT_SIZE = 30 #pixels
-SQUARE_SIZE = 40 #pixels
+AXIS_FONT_SIZE = 58 #pixels
+MSG_FONT_SIZE = 40 #pixels
+SQUARE_SIZE = 52 #pixels
 NUM_ROWS = 10 #row count
 NUM_COLS = 10 # column count
 WIN_Y = SQUARE_SIZE * (NUM_ROWS)

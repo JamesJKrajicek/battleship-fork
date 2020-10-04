@@ -85,7 +85,7 @@ class Battleship:
             self.placeShip(newShip, effectiveX, effectiveY, gs.lenShip, gs.shipDir)
             player_ships.append(newShip)
             gs.lenShip += 1
-            gs.msg = "P1 place your " + str(gs.lenShip) + " ship. Press \"R\" to rotate."
+            gs.msg = player_name + " place your " + str(gs.lenShip) + " ship. Press \"R\" to rotate."
             # If player one finishes placing, reset things for player two's turn
             if gs.lenShip > gs.numShipsPerPlayer:
                 if gs.is_P1_turn:
@@ -178,7 +178,7 @@ class Battleship:
                     mousePos = pg.mouse.get_pos() #mousePos within the game window
                     effectiveX = math.floor(mousePos[0]/(c.SQUARE_SIZE)) #Pixel Count/Pixels per square == Cell that the mouse clicked on.
                     effectiveY = math.floor(mousePos[1]/(c.SQUARE_SIZE))
-                    player_name = "P" + str(2-int(gs.is_P1_turn)) # P1 or P2
+                    player_name = "P1" if gs.is_P1_turn else "P2"
 
                     if gs.is_placing:
                         self.placing(effectiveX, effectiveY, gs, player_name)
@@ -188,7 +188,7 @@ class Battleship:
 
             if not gs.is_P1_turn and not gs.playerType == 1:
                 effectiveX, effectiveY  = self.AI.shipPlacement(gs)
-                player_name = "P" + str(2-int(gs.is_P1_turn)) # P1 or P2
+                player_name = "P2" # AI is always P2 (right board)
 
                 if gs.is_placing:
                     self.placing(effectiveX, effectiveY, gs, player_name)
