@@ -1,10 +1,10 @@
 import string 
 
-"""
-@This file is used to store constant values to be referenced by other modules
+"""!
+This file store constants referenced in other modules
 """
 
-MSG_FONT_SIZE = 20 #pixels
+MSG_FONT_SIZE = 30 #pixels
 SQUARE_SIZE = 40 #pixels
 NUM_ROWS = 10 #row count
 NUM_COLS = 10 # column count
