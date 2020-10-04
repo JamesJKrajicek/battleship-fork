@@ -25,39 +25,54 @@ class AI:
         ycoord = r.randint(1, c.NUM_COLS-1) #Generates number between 1 and 9 (boundaries of boards)
         return (xcoord, ycoord)
 
-    def shooting(self):
+    def getPoints(self, gs):
         """!
-        @pre The game is running ant it is the AI's turn to fire
+        @pre The game is running and it is the AI's turn to fire
         @post
         @return
         """
         if self.difficulty == 2:
-            self.easy()
+            return self.easy(gs)
         elif self.difficulty == 3:
             self.medium()
         else:
-            self.hard()
+            return self.hard(gs)
 
-    def easy(self):
-        """!
-        @pre
-        @post
-        @return
-        """
-        pass
+    def easy(self, gs):
+     
+        enemy_ships = gs.p2Ships if gs.is_P1_turn else gs.p1Ships
+        squares = []
+        for ship in enemy_ships:
+            for square in ship.shipSquares:
+                squares.append(square)
+
+        while True:
+            x = r.randint(1, 9)
+            y = r.randint(1, 9)
+
+            flag = True
+            for square in squares:
+                if square.x == x and square.y == y:
+                    if not square.hit:
+                        return x, y
+                    else:
+                        flag = False
+                        break
+
+            if flag:
+                return x, y
 
     def medium(self):
-        """!
-        @pre
-        @post
-        @return
-        """
+      
         pass
 
-    def hard(self):
-        """!
-        @pre
-        @post
-        @return
-        """
-        pass
+    def hard(self, gs):
+
+        enemy_ships = gs.p2Ships if gs.is_P1_turn else gs.p1Ships
+        for ship in enemy_ships:
+            for square in ship.shipSquares:
+                if not square.hit:
+                    return square.x, square.y
+
+        return 1, 1
+
