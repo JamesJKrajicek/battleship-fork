@@ -1,4 +1,5 @@
 import random as r
+import src.constants as c
 
 class AI:
     """
@@ -10,13 +11,13 @@ class AI:
         """
         self.difficulty = difficulty
 
-    def shipPlacement(self):
+    def shipPlacement(self, gs):
         """
         docstring
         """
-        xcoord = r.randint(9,19)
-        ycoord = r.randint(1,9)
-        #coord = [xcoord, ycoord]
+        gs.shipDir = (gs.shipDir + 1) % len(c.DIRS) #Generates number between 0-3 for direction change
+        xcoord = r.randint(c.NUM_ROWS-1 ,2*c.NUM_ROWS-1) #Generates number between 9-19 (boundaries of second board)
+        ycoord = r.randint(1, c.NUM_COLS-1) #Generates number between 1 and 9 (boundaries of boards)
         return (xcoord, ycoord)
 
     def shooting(self):
