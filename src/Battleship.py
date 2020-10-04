@@ -113,11 +113,13 @@ class Battleship:
         enemy_ships = gs.p2Ships if gs.is_P1_turn else gs.p1Ships
         # If the player fired at an open space on the correct board
         if (0 < effectiveY < c.NUM_ROWS and
-            ((c.NUM_COLS if gs.is_P1_turn else 0) < effectiveX < ((c.NUM_COLS*2) if gs.is_P1_turn else c.NUM_COLS)) and 
-            ((gs.grid.grid[effectiveY][effectiveX] == "Open") or (gs.grid.grid[effectiveY][effectiveX] == "Ship")) 
+            ((c.NUM_COLS if gs.is_P1_turn else 0) < effectiveX < ((c.NUM_COLS*2) if gs.is_P1_turn else c.NUM_COLS)) and
+            ((gs.grid.grid[effectiveY][effectiveX] == "Open") or (gs.grid.grid[effectiveY][effectiveX] == "Ship"))
         ):
             gs.grid.shoot(effectiveY, effectiveX)
             gs.msg = player_name + " miss."
+            if gs.player_type != 1:
+                self.ai.hit_shot = False
             gs.is_P1_turn = not gs.is_P1_turn
             # Find if the space they attacked has an enemy ship
             for ship in enemy_ships: #For each ship element in the array of enemy ships (assigned above) do the following:
@@ -127,6 +129,8 @@ class Battleship:
                         self.view.play_hit_sound()
                         gs.msg = player_name + " hit!"
                         square.hit = True
+                        if gs.player_type != 1:
+                            self.ai.hit_shot = True
                         # Check if they sunk the ship
                         if ship.checkSunk():
                             self.view.play_sunk_sound()
@@ -137,7 +141,7 @@ class Battleship:
                                 gs.is_shooting = False
         else:
             gs.msg = player_name + " invalid space! Try again."
-            
+
     def run(self):
         """!
         Runs the main game loop during gameplay (ship placement and attacking)
@@ -166,9 +170,9 @@ class Battleship:
                 elif event.type == pg.KEYDOWN:
                     # If the user types "r" and someone is placing, rotate to the next direction
                     if event.key == pg.K_r and gs.is_placing:
-                        gs.shipDir = (gs.shipDir + 1) % len(c.DIRS)       
+                        gs.shipDir = (gs.shipDir + 1) % len(c.DIRS)
 
-                # When the user clicks, do one of three things  
+                # When the user clicks, do one of three things
                 elif event.type == pg.MOUSEBUTTONDOWN: #NOTE: When AI methods are ready change condition to: gs.is_P1_turn and event.type == pg.MOUSEBUTTONDOWN
                     # Get the mouse position and convert it to an X/Y coordinate on the grid
                     mousePos = pg.mouse.get_pos() #mousePos within the game window
@@ -190,8 +194,8 @@ class Battleship:
                     self.placing(effectiveX, effectiveY, gs, player_name)
 
                 elif gs.is_shooting:
-                    self.shooting(effectiveX, effectiveY, gs, player_name) #NOTE: When AI methods are ready replace with: self.AI.shooting()    
-        
+                    self.shooting(effectiveX, effectiveY, gs, player_name) #NOTE: When AI methods are ready replace with: self.AI.shooting()
+
             # Update the screen for this frame
             self.view.draw(gs)
             # Advance the while loop at increments of 60FPS
