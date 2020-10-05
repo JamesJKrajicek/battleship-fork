@@ -206,6 +206,10 @@ class Battleship:
                 clock.tick(15) #Chad level fps
 
     def transition (self):
+        """!
+        Transitions the gameplay from a player's turn to a blank transition state (transition_clicks ==0) and back to the second player's board (transition_clicks == 1).
+        @post The second player's board is displayed and ready for gameplay.
+        """
         if (self.transition_clicks == 0):
             self.gs.in_transition = True
             self.gs.is_P1_turn = not self.gs.is_P1_turn
