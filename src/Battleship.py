@@ -247,6 +247,7 @@ class Battleship:
                             self.placing(effectiveX, effectiveY, gs, player_name)
                             if (self.transition_next):
                                 self.transition()
+                                    
                         elif gs.is_shooting:
                             self.shooting(effectiveX, effectiveY, gs, player_name)
                             
@@ -255,28 +256,34 @@ class Battleship:
                     
                     
             if not gs.is_P1_turn and not gs.playerType == 1:
-
-                effectiveX, effectiveY = self.AI.shipPlacement(gs)
-
                 player_name = "P" + str(2 - int(gs.is_P1_turn))  # P1 or P2
-
+                
                 if gs.is_placing:
+                    effectiveX, effectiveY = self.AI.shipPlacement(gs)
                     self.placing(effectiveX, effectiveY, gs, player_name)
 
                 elif gs.is_shooting:
                     effectiveX, effectiveY = self.AI.getPoints(gs)  
                     self.shooting(effectiveX, effectiveY, gs, player_name)
-
-            # Update the screen for this frame
-            self.view.draw(gs)
+  
+            while self.transition_next and gs.playerType != 1: # AI
+                self.transition() # Skip transition when playing against AI
+                    
+            # Update the screen for this frame if it's not the AI's turn (so their ships aren't revealed)
+            if gs.is_P1_turn or gs.playerType == 1:
+                self.view.draw(gs)
+                
             # Advance the while loop at increments of 60FPS
             clock.tick(60 if gs.is_placing else 15)
 
     def transition(self):
         """!
-        Transitions the gameplay from a player's turn to a blank transition state (transition_clicks ==0) and back to the second player's board (transition_clicks == 1).
+        Transitions the gameplay from a player's turn to a blank transition state (transition_clicks == 0) and back to the second player's board (transition_clicks == 1).
         @post The second player's board is displayed and ready for gameplay.
         """
+        #if self.gs.playerType != 1: # AI
+        #    self.transition_clicks = 1 # Skip transition
+        
         if self.transition_clicks == 0:
             self.gs.in_transition = True
             self.gs.is_P1_turn = not self.gs.is_P1_turn
