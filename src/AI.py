@@ -108,36 +108,27 @@ class AI:
                         self.arr[self.prev_y] [self.prev_x] = self.hit
                     else:
                         self.arr[self.prev_y] [self.prev_x] = self.miss
-                        self.north_hit = False
-                else:
-                    self.arr[self.prev_y] [self.prev_x] = self.miss
-                if self.hit_shot:
                     if self.east_hit:
                         self.arr[self.prev_y] [self.prev_x] = self.hit
                     else:
                         self.arr[self.prev_y] [self.prev_x] = self.miss
-                        self.east_hit = False
-                else:
-                    self.arr[self.prev_y] [self.prev_x] = self.miss
-                if self.hit_shot:
                     if self.south_hit:
                         self.arr[self.prev_y] [self.prev_x] = self.hit
                     else:
                         self.arr[self.prev_y] [self.prev_x] = self.miss
-                        self.south_hit = False
-                else:
-                    self.arr[self.prev_y] [self.prev_x] = self.miss
-                if self.hit_shot:
                     if self.west_hit:
                         self.arr[self.prev_y] [self.prev_x] = self.hit
                     else:
                         self.arr[self.prev_y] [self.prev_x] = self.miss
-                        self.west_hit = False
                 else:
                     self.arr[self.prev_y] [self.prev_x] = self.miss
         #main code
         while 1:
             if self.state == 0:
+                self.north_hit = False
+                self.east_hit = False
+                self.south_hit = False
+                self.west_hit = False
                 if self.rand_x == int() or self.rand_y == int():
                     self.rand_x = r.randint(1,9)
                     self.rand_y = r.randint(1,9)
@@ -147,7 +138,7 @@ class AI:
                         self.rand_y = r.randint(1,9)
                 self.shot_type = 10
                 return self.rand_x, self.rand_y
-            if self.state == 1:
+            elif self.state == 1:
                 if self.shot_type == 10:
                     self.shot_type = self.shot_type + 10
                     if self.rand_y-1 > 0:
@@ -174,35 +165,44 @@ class AI:
                         return self.prev_x, self.prev_y
                 self.shot_type = 10
                 self.state = 2
-            if self.state == 2:
+                self.hit_shot = True
+            elif self.state == 2:
                 if self.north_hit:
-                    if self.rand_y - self.radius > 0:
+                    if self.rand_y - self.radius > 0 and self.hit_shot:
                         self.prev_y = self.rand_y - self.radius
                         self.prev_x = self.rand_x
+                        self.radius = self.radius+1
                         return self.prev_x, self.prev_y
                     else:
                         self.north_hit = False
-                if self.east_hit:
-                    if self.rand_x + self.radius <= 9:
+                        self.radius = 2
+                elif self.east_hit:
+                    if self.rand_x + self.radius <= 9 and self.hit_shot:
                         self.prev_x = self.rand_x + self.radius
                         self.prev_y = self.rand_y
+                        self.radius = self.radius+1
                         return self.prev_x, self.prev_y
                     else:
                         self.east_hit = False
-                if self.south_hit:
-                    if self.rand_y + self.radius <= 9:
+                        self.radius = 2
+                elif self.south_hit:
+                    if self.rand_y + self.radius <= 9 and self.hit_shot:
                         self.prev_y = self.rand_y + self.radius
                         self.prev_x = self.rand_x
+                        self.radius = self.radius+1
                         return self.prev_x, self.prev_y
                     else:
                         self.south_hit = False
-                if self.west_hit:
-                    if self.rand_x - self.radius > 0:
+                        self.radius = 2
+                elif self.west_hit:
+                    if self.rand_x - self.radius > 0 and self.hit_shot:
                         self.prev_x = self.rand_x - self.radius
                         self.prev_y = self.rand_y
+                        self.radius = self.radius+1
                         return self.prev_x, self.prev_y
                     else:
                         self.west_hit = False
+                        self.radius = 2
                 else:
                     self.state = 0
 
