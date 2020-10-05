@@ -1,10 +1,25 @@
 var class_a_i_1_1_a_i =
 [
     [ "__init__", "class_a_i_1_1_a_i.html#acdd1cd11d0a40b1a8e61608a354080b9", null ],
-    [ "easy", "class_a_i_1_1_a_i.html#a06d47b1ad71f19ab12d88466b7acdd5d", null ],
-    [ "hard", "class_a_i_1_1_a_i.html#a71199d3dd4bf2336f73ff74a0c87b489", null ],
+    [ "easy", "class_a_i_1_1_a_i.html#aa992eca867637cb5d28ba5c34e560efc", null ],
+    [ "getPoints", "class_a_i_1_1_a_i.html#a3428b74ef5afcf1015f490dc40ca59eb", null ],
+    [ "hard", "class_a_i_1_1_a_i.html#ad46bd0bb91b67acdf613e2d76f147318", null ],
     [ "medium", "class_a_i_1_1_a_i.html#ac7a7cfd42c780487ca6245bf5c76f923", null ],
     [ "shipPlacement", "class_a_i_1_1_a_i.html#a76ee771b6cecd3529e53855bbf11a299", null ],
-    [ "shooting", "class_a_i_1_1_a_i.html#a51e1b99f792fc344db0ba4500ebf503e", null ],
-    [ "difficulty", "class_a_i_1_1_a_i.html#ab385fda61aca852983b2fec4e599d396", null ]
+    [ "arr", "class_a_i_1_1_a_i.html#ad5975b0cc5a4d70f53416fb092f2ff82", null ],
+    [ "difficulty", "class_a_i_1_1_a_i.html#ab385fda61aca852983b2fec4e599d396", null ],
+    [ "east_hit", "class_a_i_1_1_a_i.html#a93bd957471c808e7478be79ec5b1b5ac", null ],
+    [ "hit", "class_a_i_1_1_a_i.html#a52d50fd9c8f2dfd6c8f88ea2c42a68e2", null ],
+    [ "hit_shot", "class_a_i_1_1_a_i.html#a84158859b8845e63242dfa27296d71ba", null ],
+    [ "miss", "class_a_i_1_1_a_i.html#a9c19088fcf5eace27a28a19ffd947375", null ],
+    [ "north_hit", "class_a_i_1_1_a_i.html#a497fa2dc97b8eeac78c439e992bb25f5", null ],
+    [ "prev_x", "class_a_i_1_1_a_i.html#a661a3246edcee8221df1b1564f362360", null ],
+    [ "prev_y", "class_a_i_1_1_a_i.html#a909fd6a282d40684af96c2b22e75e9bd", null ],
+    [ "radius", "class_a_i_1_1_a_i.html#a297cf12f01f3c2682fabaa7f7861612c", null ],
+    [ "rand_x", "class_a_i_1_1_a_i.html#a857ee2fb855c7c6a5353baf80381e778", null ],
+    [ "rand_y", "class_a_i_1_1_a_i.html#a7d800e9ca564f502f78bc13b3699040a", null ],
+    [ "shot_type", "class_a_i_1_1_a_i.html#a4f429ea13b9cdd188451b039a4939e72", null ],
+    [ "south_hit", "class_a_i_1_1_a_i.html#a025e9b1128f9a14882b45a84874aaf5f", null ],
+    [ "state", "class_a_i_1_1_a_i.html#aefc8cba38d8b5d7b8f77616a9deb2978", null ],
+    [ "west_hit", "class_a_i_1_1_a_i.html#a6b5b0b84a6ce2603ff75d4602892f5d9", null ]
 ];

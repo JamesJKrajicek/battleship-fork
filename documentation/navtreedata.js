@@ -25,6 +25,9 @@
 var NAVTREE =
 [
   [ "Battleship Fork", "index.html", [
+    [ "How to play", "index.html#autotoc_md1", null ],
+    [ "View documentation", "index.html#autotoc_md2", null ],
+    [ "Works cited", "index.html#autotoc_md3", null ],
     [ "Packages", "namespaces.html", [
       [ "Packages", "namespaces.html", "namespaces_dup" ],
       [ "Package Functions", "namespacemembers.html", [
@@ -40,16 +43,13 @@ var NAVTREE =
         [ "Functions", "functions_func.html", null ],
         [ "Variables", "functions_vars.html", null ]
       ] ]
-    ] ],
-    [ "Files", "files.html", [
-      [ "File List", "files.html", "files_dup" ]
     ] ]
   ] ]
 ];
 
 var NAVTREEINDEX =
 [
-"_a_i_8py.html"
+"annotated.html"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

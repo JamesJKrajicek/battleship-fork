@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['y_153',['y',['../classship_1_1_ship_node.html#a20b6b9d9280923a552cb8db7dd33d08c',1,'ship::ShipNode']]]
+  ['x_187',['x',['../classship_1_1_ship_node.html#a503e5b0c08f1a6754433b9fc35534f1f',1,'ship::ShipNode']]]
 ];
