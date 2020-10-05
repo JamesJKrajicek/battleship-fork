@@ -22,7 +22,8 @@ class GameState:
         self.p1Ships = []
         self.p2Ships = []
         
-         # Number of special shots each player has
+        # Number of special shots each player has (gain one every 10 rounds)
+        self.round = 0
         self.p1_special_shots = 0
         self.p2_special_shots = 0
         

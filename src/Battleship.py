@@ -151,6 +151,12 @@ class Battleship:
         @param player_name string: The name of the current player to include in the message
         """
         
+        # Ensure the player has special shots available
+        special_shots = gs.p1_special_shots if self.gs.is_P1_turn else gs.p2_special_shots
+        if special_shots <= 0:
+            gs.msg = "No special shots available. Left click for normal shot."
+            return
+        
         # Ensure the entire 3x3 area is within the player's board
         board_left_edge = c.NUM_COLS + 2 if gs.is_P1_turn else 2
         board_right_edge = c.NUM_COLS*2 + 2 if gs.is_P1_turn else c.NUM_COLS - 2
@@ -190,6 +196,11 @@ class Battleship:
         elif gs.is_shooting: # Make sure game wasn't won
             gs.msg = player_name + " hits:" + str(hit_count) + " and sinks:" + str(sink_count)
             self.transition_next = True # To switch turns
+            # Remove the special shot
+            if self.gs.is_P1_turn: 
+                gs.p1_special_shots -= 1
+            else:
+                gs.p2_special_shots -= 1
             
             
     def run(self):
@@ -228,19 +239,18 @@ class Battleship:
                     effectiveX = math.floor(mousePos[0]/(c.SQUARE_SIZE)) #Pixel Count/Pixels per square == Cell that the mouse clicked on.
                     effectiveY = math.floor(mousePos[1]/(c.SQUARE_SIZE))
                     player_name = "P1" if gs.is_P1_turn else "P2"
-                    if (event.button == 1 and self.transition_next == False): #Left Button Click
-                        
-                        if gs.is_placing:
+                    
+                    if event.button == 1: #Left click
+                        if self.transition_next:
+                            self.transition() #If the player's turn is done then move into the transition phase.
+                        elif gs.is_placing:
                             self.placing(effectiveX, effectiveY, gs, player_name)
                             if (self.transition_next):
                                 self.transition()
-                        elif (gs.is_shooting):
+                        elif gs.is_shooting:
                             self.shooting(effectiveX, effectiveY, gs, player_name)
-
-                    elif (event.button == 1 and self.transition_next == True):
-                        self.transition () #If the player's turn is done then move into the transition phase.
-                        
-                    elif event.button == 3 and gs.is_shooting and self.transition_next == False: # Right click
+                            
+                    elif event.button == 3 and gs.is_shooting and not self.transition_next: # Right click
                         self.special_shot(effectiveX, effectiveY, gs, player_name)
                     
                     
@@ -260,33 +270,38 @@ class Battleship:
             # Update the screen for this frame
             self.view.draw(gs)
             # Advance the while loop at increments of 60FPS
-            if (gs.is_placing):
-                clock.tick(60) #Buttery smooth ship placement.
-            else:
-                clock.tick(15) #Chad level fps
+            clock.tick(60 if gs.is_placing else 15)
 
-    def transition (self):
+    def transition(self):
         """!
         Transitions the gameplay from a player's turn to a blank transition state (transition_clicks ==0) and back to the second player's board (transition_clicks == 1).
         @post The second player's board is displayed and ready for gameplay.
         """
-        if (self.transition_clicks == 0):
+        if self.transition_clicks == 0:
             self.gs.in_transition = True
             self.gs.is_P1_turn = not self.gs.is_P1_turn
-            t_player_name = "P1" if self.gs.is_P1_turn else "P2"
-            self.gs.msg = t_player_name+", left click to start your turn."
-            self.transition_clicks = (self.transition_clicks+1)
-            return
-        elif (self.transition_clicks == 1):
+            player_name = "P1" if self.gs.is_P1_turn else "P2"
+            self.gs.msg = player_name + ", left click to start your turn."
+            self.transition_clicks = 1
+        elif self.transition_clicks == 1:
             self.gs.in_transition = False
             self.transition_next = False
-            self.transition_clicks = 0
-            self.gs.msg =""
-            if (self.gs.is_placing):
+            self.transition_clicks = 0 
+            
+            if self.gs.is_placing:
                 #self.gs.is_P1_turn = True
                 self.gs.is_placing = False
                 self.gs.is_shooting = True
                 self.gs.msg = "All ships placed. P1 shoot first."
-            return
-
-
+            else: # Shooting
+                # Update round and special shots
+                if self.gs.is_P1_turn: 
+                    self.gs.round += 1
+                    if self.gs.round % c.SPECIAL_SHOT_RATE == 0:
+                        self.gs.p1_special_shots += 1
+                        self.gs.p2_special_shots += 1
+                        
+                player_name = "P1" if self.gs.is_P1_turn else "P2"
+                special_shots = self.gs.p1_special_shots if self.gs.is_P1_turn else self.gs.p2_special_shots
+                self.gs.msg = player_name + " make your shot. Special shots (right click): " + str(special_shots)
+                
