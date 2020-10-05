@@ -15,6 +15,7 @@ WHITE = [255,255,255]
 BLACK = [0,0,0]
 RED = [255,0,0]
 BLUE = [0,0,255]
+GREY = [16,16,16]
 Alpha = list(string.ascii_uppercase) #list of alphabet. string lib needed
 
 # Used for ship placement, in clockwise order. Order: Down, Left, Up, Right.

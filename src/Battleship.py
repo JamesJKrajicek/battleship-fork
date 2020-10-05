@@ -82,26 +82,25 @@ class Battleship:
         @param player_name string: The name of the current player to include in the message
         """
         player_ships = gs.p1Ships if gs.is_P1_turn else gs.p2Ships
-        if self.checkValidShip(gs.is_P1_turn, effectiveX, effectiveY, gs.lenShip, gs.shipDir):
-            newShip = Ship()
-            self.placeShip(newShip, effectiveX, effectiveY, gs.lenShip, gs.shipDir)
-            player_ships.append(newShip)
-            gs.lenShip += 1
-            gs.msg = player_name + " place your " + str(gs.lenShip) + " ship. Press \"R\" to rotate."
-            # If player one finishes placing, reset things for player two's turn
-            if gs.lenShip > gs.numShipsPerPlayer:
-                if gs.is_P1_turn:
-                    gs.msg = "Now P2, place your 1 ship. Press \"R\" to rotate."
-                    gs.shipDir = 0
-                    gs.is_P1_turn = False
-                    gs.lenShip = 1
-                else: #P2 turn
-                    gs.is_P1_turn = True
-                    gs.is_placing = False
-                    gs.is_shooting = True
-                    gs.msg = "All ships placed. P1 shoot first."
-        else:
-            gs.msg = player_name + " invalid ship location! Press \"R\" to rotate."
+        if (self.transition_next == False):
+            if self.checkValidShip(gs.is_P1_turn, effectiveX, effectiveY, gs.lenShip, gs.shipDir):
+                newShip = Ship()
+                self.placeShip(newShip, effectiveX, effectiveY, gs.lenShip, gs.shipDir)
+                player_ships.append(newShip)
+                gs.lenShip += 1
+                gs.msg = player_name + " place your " + str(gs.lenShip) + " ship. Press \"R\" to rotate."
+                # If player one finishes placing, reset things for player two's turn
+                if gs.lenShip > gs.numShipsPerPlayer:
+                    if (gs.is_P1_turn):
+                        gs.msg = "Now P2, place your 1 ship. Press \"R\" to rotate."
+                        gs.shipDir = 0
+                        gs.is_P1_turn = False
+                        gs.lenShip = 1
+                    else:
+                        self.transition_next = True
+                
+            else:
+                gs.msg = player_name + " invalid ship location! Press \"R\" to rotate."
 
     def shooting(self, effectiveX, effectiveY, gs, player_name):
         """!
@@ -181,7 +180,8 @@ class Battleship:
                         
                         if gs.is_placing:
                             self.placing(effectiveX, effectiveY, gs, player_name)
-
+                            if (self.transition_next):
+                                self.transition()
                         elif (gs.is_shooting):
                             self.shooting(effectiveX, effectiveY, gs, player_name)
 
@@ -222,6 +222,11 @@ class Battleship:
             self.transition_next = False
             self.transition_clicks = 0
             self.gs.msg =""
+            if (self.gs.is_placing):
+                #self.gs.is_P1_turn = True
+                self.gs.is_placing = False
+                self.gs.is_shooting = True
+                self.gs.msg = "All ships placed. P1 shoot first."
             return
 
 
