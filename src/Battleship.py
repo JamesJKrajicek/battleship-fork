@@ -18,6 +18,8 @@ class Battleship:
         @pre none
         @post The members of the Battleship object are initialized, including the game view and state. The number of ships and opponent are determined and stored in the game state.
         """
+        self.transition_next = False
+        self.transition_clicks = 0
         self.view = BattleshipView()
         self.gs = GameState()
         self.gs.msg = "Awaiting number of ships..."
@@ -116,25 +118,26 @@ class Battleship:
             ((c.NUM_COLS if gs.is_P1_turn else 0) < effectiveX < ((c.NUM_COLS*2) if gs.is_P1_turn else c.NUM_COLS)) and 
             ((gs.grid.grid[effectiveY][effectiveX] == "Open") or (gs.grid.grid[effectiveY][effectiveX] == "Ship")) 
         ):
+            self.transition_next = True
             gs.grid.shoot(effectiveY, effectiveX)
-            gs.msg = player_name + " miss."
-            gs.is_P1_turn = not gs.is_P1_turn
+            gs.msg = player_name + " miss (left click to change turn)"
             # Find if the space they attacked has an enemy ship
             for ship in enemy_ships: #For each ship element in the array of enemy ships (assigned above) do the following:
                 for square in ship.shipSquares: #For each square contained in the target ship's array of squares do the following:
                     # If player hit a ship
                     if square.x == effectiveX and square.y == effectiveY: #If the point you clicked on is at the same location as a square contained by the ship then do the following:
                         self.view.play_hit_sound()
-                        gs.msg = player_name + " hit!"
+                        gs.msg = player_name + " hit! (left click to change turn)"
                         square.hit = True
                         # Check if they sunk the ship
                         if ship.checkSunk():
                             self.view.play_sunk_sound()
-                            gs.msg = player_name + " sunk a ship!"
+                            gs.msg = player_name + " sunk a ship! (left click to change turn)"
                             # Check if they won the game
                             if gs.grid.check_winner(gs.numShipsPerPlayer):
                                 gs.msg = player_name + " wins!"
                                 gs.is_shooting = False
+                                self.transition_next = False
         else:
             gs.msg = player_name + " invalid space! Try again."
             
@@ -146,7 +149,6 @@ class Battleship:
         """
         # Initialize the clock to control framerate
         clock = pg.time.Clock()
-
         gs = self.gs
         gs.is_P1_turn = True
         gs.is_placing = True
@@ -175,13 +177,16 @@ class Battleship:
                     effectiveX = math.floor(mousePos[0]/(c.SQUARE_SIZE)) #Pixel Count/Pixels per square == Cell that the mouse clicked on.
                     effectiveY = math.floor(mousePos[1]/(c.SQUARE_SIZE))
                     player_name = "P1" if gs.is_P1_turn else "P2"
+                    if (event.button == 1 and self.transition_next == False): #Left Button Click
+                        
+                        if gs.is_placing:
+                            self.placing(effectiveX, effectiveY, gs, player_name)
 
-                    if gs.is_placing:
-                        self.placing(effectiveX, effectiveY, gs, player_name)
+                        elif (gs.is_shooting):
+                            self.shooting(effectiveX, effectiveY, gs, player_name)
 
-                    elif gs.is_shooting:
-                        self.shooting(effectiveX, effectiveY, gs, player_name)
-
+                    elif (event.button == 1 and self.transition_next == True):
+                        self.transition () #If the player's turn is done then move into the transition phase.
             if not gs.is_P1_turn and not gs.playerType == 1:
 
                 effectiveX, effectiveY = self.AI.shipPlacement(gs)
@@ -198,4 +203,28 @@ class Battleship:
             # Update the screen for this frame
             self.view.draw(gs)
             # Advance the while loop at increments of 60FPS
-            clock.tick(60)
+            if (gs.is_placing):
+                clock.tick(60) #Buttery smooth ship placement.
+            else:
+                clock.tick(15) #Chad level fps
+
+    def transition (self):
+        """!
+        Transitions the gameplay from a player's turn to a blank transition state (transition_clicks ==0) and back to the second player's board (transition_clicks == 1).
+        @post The second player's board is displayed and ready for gameplay.
+        """
+        if (self.transition_clicks == 0):
+            self.gs.in_transition = True
+            self.gs.is_P1_turn = not self.gs.is_P1_turn
+            t_player_name = "P1" if self.gs.is_P1_turn else "P2"
+            self.gs.msg = t_player_name+", left click to start your turn."
+            self.transition_clicks = (self.transition_clicks+1)
+            return
+        elif (self.transition_clicks == 1):
+            self.gs.in_transition = False
+            self.transition_next = False
+            self.transition_clicks = 0
+            self.gs.msg =""
+            return
+
+

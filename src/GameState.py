@@ -22,4 +22,5 @@ class GameState:
         self.is_P1_turn = False
         self.is_placing = False
         self.is_shooting = False
+        self.in_transition = False
         self.msg = "" # Message to display below game board
