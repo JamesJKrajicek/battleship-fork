@@ -31,6 +31,9 @@ class BattleshipView:
         self.boardHighlight = pg.Surface((int(c.WIN_X / 2), int(c.WIN_Y)))
         self.boardHighlight.set_alpha(99)
         self.boardHighlight.fill(c.RED)
+        self.boardHighlight_grey = pg.Surface((int(c.WIN_X), int(c.WIN_Y)))
+        self.boardHighlight_grey.set_alpha(99)
+        self.boardHighlight_grey.fill(c.GREY)
         self.bg = pg.transform.scale(pg.image.load("media/background-day.jpg"), (c.WIN_X, c.WIN_Y))
         self.hit = pg.transform.scale(pg.image.load("media/redX.png"), (c.SQUARE_SIZE, c.SQUARE_SIZE))
         self.miss = pg.transform.scale(pg.image.load("media/blackX.png"), (c.SQUARE_SIZE, c.SQUARE_SIZE))
@@ -123,15 +126,21 @@ class BattleshipView:
                 if row != 0 and (column == 0 or column == c.NUM_COLS):
                     self.screen.blit(self.font.render(str(row), True, c.BLACK), (int(column*c.SQUARE_SIZE + c.SQUARE_SIZE/4), row * c.SQUARE_SIZE))
                     
-        if gs.is_placing:
+        if (gs.is_placing and (gs.in_transition == False)):
             #display a mock ship and the direction it's being placed
             mousePos = pg.mouse.get_pos()
             pg.draw.line(self.screen, c.RED, (mousePos[0], mousePos[1]), (mousePos[0] + c.SQUARE_SIZE * gs.lenShip * c.DIRS[gs.shipDir][0], mousePos[1] + (c.SQUARE_SIZE * gs.lenShip * c.DIRS[gs.shipDir][1])), 10)
 
         # Highlight the active board
-        if gs.is_placing:
-            self.screen.blit(self.boardHighlight, ( 0 if gs.is_P1_turn else c.NUM_COLS*c.SQUARE_SIZE,0)) #Right Half is player 2
-        elif (gs.is_shooting and (gs.in_transition == False)):
-            self.screen.blit(self.boardHighlight, (c.NUM_COLS*c.SQUARE_SIZE if gs.is_P1_turn else 0, 0))
+        if (gs.is_placing):
+            if (gs.in_transition):
+                self.screen.blit(self.boardHighlight_grey, (0,0)) #Right Half is player 2
+            else:
+                self.screen.blit(self.boardHighlight, ( 0 if gs.is_P1_turn else c.NUM_COLS*c.SQUARE_SIZE,0)) #Right Half is player 2
+        elif (gs.is_shooting):
+            if (gs.in_transition):
+                self.screen.blit(self.boardHighlight_grey, (0,0))
+            else:
+                self.screen.blit(self.boardHighlight, (c.NUM_COLS*c.SQUARE_SIZE if gs.is_P1_turn else 0, 0))
             
         pg.display.update()
