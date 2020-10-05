@@ -1,5 +1,6 @@
 import pygame as pg
 import sys
+from time import sleep
 import math
 from src.BattleshipView import BattleshipView
 from src.GameState import GameState
@@ -105,7 +106,7 @@ class Battleship:
 
     def shooting(self, effectiveX, effectiveY, gs, player_name):
         """!
-        @pre A player has selected a location on the grid to attempt to fired
+        @pre A player has selected a location on the grid to attempt to fire
         @post The message is updated. If the location is valid (correct board and not already attacked), checks for a hit, sink, or win. If not a win, switches turns.
         @param effectiveX int: The X-coordinate of the grid being fired at (0-19)
         @param effectiveY int: The Y-coordinate of the grid being fired at (0-9)
@@ -140,6 +141,57 @@ class Battleship:
                                 self.transition_next = False
         else:
             gs.msg = player_name + " invalid space! Try again."
+            
+    def special_shot(self, effectiveX, effectiveY, gs, player_name):
+        """!
+        @pre A player has selected a location on the grid to attempt to fire a special shot
+        @post The message is updated. If the player has a special shot available and is firing within their board, fires at all spaces in a 3x3 area
+        @param effectiveX int: The X-coordinate of the grid being fired at (0-19)
+        @param effectiveY int: The Y-coordinate of the grid being fired at (0-9)
+        @param gs GameState: The object representing the current state of the game. This will be modified upon successful firing.
+        @param player_name string: The name of the current player to include in the message
+        """
+        
+        # Ensure the entire 3x3 area is within the player's board
+        board_left_edge = c.NUM_COLS + 2 if gs.is_P1_turn else 2
+        board_right_edge = c.NUM_COLS*2 + 2 if gs.is_P1_turn else c.NUM_COLS - 2
+        if effectiveY < 2 or effectiveY > c.NUM_COLS - 2 or effectiveX < board_left_edge or effectiveX > board_right_edge:
+            gs.msg = "The 3x3 shot will not fit there. Try again."
+            return
+            
+        enemy_ships = gs.p2Ships if gs.is_P1_turn else gs.p1Ships
+        # Attack all spaces in the 3x3 area
+        hit_or_miss = False # If any spaces got attacked
+        hit_count = 0 # Number of ship spaces hit
+        sink_count = 0 # Number of ships sunk
+        for y in range(effectiveY-1, effectiveY+2):
+            for x in range(effectiveX-1, effectiveX+2):
+                if gs.grid.grid[y][x] == "hit" or gs.grid.grid[y][x] == "miss": # Skip already attacked spaces
+                    continue
+                gs.grid.shoot(y, x)
+                hit_or_miss = True
+                for ship in enemy_ships:
+                    for square in ship.shipSquares:
+                        if square.x == x and square.y == y:
+                            self.view.play_hit_sound()
+                            sleep(0.05) # So sounds don't overlap
+                            square.hit = True
+                            hit_count += 1
+                            if ship.checkSunk():
+                                self.view.play_sunk_sound()
+                                sleep(0.05) # So sounds don't overlap
+                                sink_count += 1
+                                if gs.grid.check_winner(gs.numShipsPerPlayer):
+                                    gs.msg = player_name + " wins!"
+                                    gs.is_shooting = False
+                                    self.transition_next = False
+        
+        if not hit_or_miss:
+            gs.msg = "The 3x3 shot will not hit anything there. Try again."
+        elif gs.is_shooting: # Make sure game wasn't won
+            gs.msg = player_name + " hits:" + str(hit_count) + " and sinks:" + str(sink_count)
+            self.transition_next = True # To switch turns
+            
             
     def run(self):
         """!
@@ -187,6 +239,11 @@ class Battleship:
 
                     elif (event.button == 1 and self.transition_next == True):
                         self.transition () #If the player's turn is done then move into the transition phase.
+                        
+                    elif event.button == 3 and gs.is_shooting and self.transition_next == False: # Right click
+                        self.special_shot(effectiveX, effectiveY, gs, player_name)
+                    
+                    
             if not gs.is_P1_turn and not gs.playerType == 1:
 
                 effectiveX, effectiveY = self.AI.shipPlacement(gs)

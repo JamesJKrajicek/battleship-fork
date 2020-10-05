@@ -21,8 +21,7 @@ class BattleshipView:
         pg.init()
         # Set up the mixer to play sounds in two channels, so sink sound and hit sound can happen at the same time
         pg.mixer.init(frequency = 44100, size = -16, channels = 1, buffer = 2**12)
-        self.channel1 = pg.mixer.Channel(0)
-        self.channel2 = pg.mixer.Channel(1)
+        pg.mixer.set_num_channels(20) # Max sounds that can play at once
         # Set the name of the window
         pg.display.set_caption("Battleship by team 14, upgraded by team 13")
         # Initialize the screen to the desired size
@@ -73,17 +72,17 @@ class BattleshipView:
 
     def play_hit_sound(self):
         """!
-        @pre None
-        @post self.hit_sound starts playing on self.channel1, overriding anything currently playing
+        @pre At least one of the mixer channels is available
+        @post self.hit_sound starts playing
         """
-        self.channel1.play(self.hit_sound)
+        pg.mixer.find_channel().play(self.hit_sound)
 
     def play_sunk_sound(self):
         """!
-        @pre None
-        @post self.sunk_sound starts playing on self.channel1, overriding anything currently playing
+        @pre At least one of the mixer channels is available
+        @post self.sunk_sound starts playing
         """
-        self.channel2.play(self.sunk_sound)
+        pg.mixer.find_channel().play(self.sunk_sound)
 
     def draw(self, gs):
         """!
