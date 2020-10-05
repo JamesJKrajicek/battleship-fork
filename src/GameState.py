@@ -12,15 +12,24 @@ class GameState:
         @pre None
         @post GameState is initialized with default values for the beginning of the game
         """
+        self.numShipsPerPlayer = 0
+        self.playerType = 1 # Whether P2 is a human (1) or AI (2-4 for difficulty)
+        
         self.grid = Grid()
         self.shipDir = 0 # Direction of the ship currently being placed (index of c.DIRS)
         self.lenShip = 1 # Length of the ship to place next
-        self.numShipsPerPlayer = 0
-        self.playerType = 1
+        
         self.p1Ships = []
         self.p2Ships = []
+        
+        # Number of special shots each player has (gain one every 10 rounds)
+        self.round = 0
+        self.p1_special_shots = 0
+        self.p2_special_shots = 0
+        
         self.is_P1_turn = False
         self.is_placing = False
         self.is_shooting = False
         self.in_transition = False
+        
         self.msg = "" # Message to display below game board
