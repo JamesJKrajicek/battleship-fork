@@ -269,8 +269,8 @@ class Battleship:
             while self.transition_next and gs.playerType != 1: # AI
                 self.transition() # Skip transition when playing against AI
                     
-            # Update the screen for this frame if it's not the AI's turn (so their ships aren't revealed)
-            if gs.is_P1_turn or gs.playerType == 1:
+            # Update the screen for this frame if it's not the AI's turn (so their ships aren't revealed) or game is won
+            if gs.is_P1_turn or gs.playerType == 1 or (not gs.is_placing and not gs.is_shooting):
                 self.view.draw(gs)
                 
             # Advance the while loop at increments of 60FPS
