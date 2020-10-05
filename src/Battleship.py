@@ -188,15 +188,18 @@ class Battleship:
                     elif (event.button == 1 and self.transition_next == True):
                         self.transition () #If the player's turn is done then move into the transition phase.
             if not gs.is_P1_turn and not gs.playerType == 1:
-                effectiveX, effectiveY  = self.AI.shipPlacement(gs)
-                player_name = "P2" # AI is always P2 (right board)
+
+                effectiveX, effectiveY = self.AI.shipPlacement(gs)
+
+                player_name = "P" + str(2 - int(gs.is_P1_turn))  # P1 or P2
 
                 if gs.is_placing:
                     self.placing(effectiveX, effectiveY, gs, player_name)
 
                 elif gs.is_shooting:
-                    self.shooting(effectiveX, effectiveY, gs, player_name) #NOTE: When AI methods are ready replace with: self.AI.shooting()    
-        
+                    effectiveX, effectiveY = self.AI.getPoints(gs)  
+                    self.shooting(effectiveX, effectiveY, gs, player_name)
+
             # Update the screen for this frame
             self.view.draw(gs)
             # Advance the while loop at increments of 60FPS
