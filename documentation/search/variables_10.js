@@ -1,4 +1,7 @@
 var searchData=
 [
-  ['x_152',['x',['../classship_1_1_ship_node.html#a503e5b0c08f1a6754433b9fc35534f1f',1,'ship::ShipNode']]]
+  ['west_5fhit_183',['west_hit',['../class_a_i_1_1_a_i.html#a6b5b0b84a6ce2603ff75d4602892f5d9',1,'AI::AI']]],
+  ['white_184',['WHITE',['../namespaceconstants.html#abf5951b6424ad650fb07c4000f689008',1,'constants']]],
+  ['win_5fx_185',['WIN_X',['../namespaceconstants.html#a359adde878d4bac7d099286b0400a28c',1,'constants']]],
+  ['win_5fy_186',['WIN_Y',['../namespaceconstants.html#aedad82c1db7c2ea5d2a1477aa54cdbbe',1,'constants']]]
 ];

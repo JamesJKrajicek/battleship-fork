@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['easy_100',['easy',['../class_a_i_1_1_a_i.html#a06d47b1ad71f19ab12d88466b7acdd5d',1,'AI::AI']]]
+  ['easy_111',['easy',['../class_a_i_1_1_a_i.html#aa992eca867637cb5d28ba5c34e560efc',1,'AI::AI']]]
 ];

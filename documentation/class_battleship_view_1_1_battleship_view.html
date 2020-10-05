@@ -110,14 +110,12 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Public Attributes</h2></td></tr>
-<tr class="memitem:a24f8f6485d08f65f85a2ee5c2cfb3da8"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_battleship_view_1_1_battleship_view.html#a24f8f6485d08f65f85a2ee5c2cfb3da8">channel1</a></td></tr>
-<tr class="separator:a24f8f6485d08f65f85a2ee5c2cfb3da8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a183ceef3372a14ba77d02d7acc951efc"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_battleship_view_1_1_battleship_view.html#a183ceef3372a14ba77d02d7acc951efc">channel2</a></td></tr>
-<tr class="separator:a183ceef3372a14ba77d02d7acc951efc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a50d80e208b7ef3b73ba00eff1e4ada1b"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_battleship_view_1_1_battleship_view.html#a50d80e208b7ef3b73ba00eff1e4ada1b">screen</a></td></tr>
 <tr class="separator:a50d80e208b7ef3b73ba00eff1e4ada1b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:abbc8a2ea2bb0f873172f9e1f5f858f9e"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_battleship_view_1_1_battleship_view.html#abbc8a2ea2bb0f873172f9e1f5f858f9e">boardHighlight</a></td></tr>
 <tr class="separator:abbc8a2ea2bb0f873172f9e1f5f858f9e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1584d796f3aba4771e6cdb4489c6aca6"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_battleship_view_1_1_battleship_view.html#a1584d796f3aba4771e6cdb4489c6aca6">boardHighlight_grey</a></td></tr>
+<tr class="separator:a1584d796f3aba4771e6cdb4489c6aca6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a85a041041086ccb28f1a1d8e8e3c3d7f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_battleship_view_1_1_battleship_view.html#a85a041041086ccb28f1a1d8e8e3c3d7f">bg</a></td></tr>
 <tr class="separator:a85a041041086ccb28f1a1d8e8e3c3d7f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a6617e3f9a3ef55f680ab35d492b86568"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_battleship_view_1_1_battleship_view.html#a6617e3f9a3ef55f680ab35d492b86568">hit</a></td></tr>
@@ -250,8 +248,8 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<dl class="section pre"><dt>Precondition</dt><dd>None </dd></dl>
-<dl class="section post"><dt>Postcondition</dt><dd>self.hit_sound starts playing on self.channel1, overriding anything currently playing </dd></dl>
+<dl class="section pre"><dt>Precondition</dt><dd>At least one of the mixer channels is available </dd></dl>
+<dl class="section post"><dt>Postcondition</dt><dd>self.hit_sound starts playing </dd></dl>
 
 </div>
 </div>
@@ -270,8 +268,8 @@ Public Attributes</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<dl class="section pre"><dt>Precondition</dt><dd>None </dd></dl>
-<dl class="section post"><dt>Postcondition</dt><dd>self.sunk_sound starts playing on self.channel1, overriding anything currently playing </dd></dl>
+<dl class="section pre"><dt>Precondition</dt><dd>At least one of the mixer channels is available </dd></dl>
+<dl class="section post"><dt>Postcondition</dt><dd>self.sunk_sound starts playing </dd></dl>
 
 </div>
 </div>
@@ -304,28 +302,14 @@ Public Attributes</h2></td></tr>
 
 </div>
 </div>
-<a id="a24f8f6485d08f65f85a2ee5c2cfb3da8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a24f8f6485d08f65f85a2ee5c2cfb3da8">&#9670;&nbsp;</a></span>channel1</h2>
+<a id="a1584d796f3aba4771e6cdb4489c6aca6"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1584d796f3aba4771e6cdb4489c6aca6">&#9670;&nbsp;</a></span>boardHighlight_grey</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">BattleshipView.BattleshipView.channel1</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-</div>
-</div>
-<a id="a183ceef3372a14ba77d02d7acc951efc"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a183ceef3372a14ba77d02d7acc951efc">&#9670;&nbsp;</a></span>channel2</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">BattleshipView.BattleshipView.channel2</td>
+          <td class="memname">BattleshipView.BattleshipView.boardHighlight_grey</td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -431,7 +415,7 @@ Public Attributes</h2></td></tr>
 </div>
 </div>
 <hr/>The documentation for this class was generated from the following file:<ul>
-<li>src/<a class="el" href="_battleship_view_8py.html">BattleshipView.py</a></li>
+<li>src/BattleshipView.py</li>
 </ul>
 </div><!-- contents -->
 </div><!-- doc-content -->
